@@ -2,7 +2,7 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
-final DynamicLibrary myDll = DynamicLibrary.open('c/ssh_handle.dll');
+final DynamicLibrary myDll = DynamicLibrary.open('c/mylibary.dll');
 
 typedef Init_ssh_c = Pointer Function();
 typedef Init_ssh_dart = Pointer Function();
@@ -37,14 +37,15 @@ typedef FreebufferDart = void Function(Pointer<Utf8> buffer);
 
 Pointer init_ssh(){
   final Init_ssh_dart initSsh = myDll
-  .lookupFunction<Init_ssh_c, Init_ssh_dart>("init_ssh");   
+  .lookupFunction<Init_ssh_c, Init_ssh_dart>('init_ssh');   
   return initSsh();
 }
 
 void ssh_set_connection_info(Pointer ssh_sesh, Pointer<Utf8> hostname, int port){
  final Ssh_set_connection_info_dart set_connection_info = myDll
       .lookupFunction<Ssh_set_connection_info_c, Ssh_set_connection_info_dart>("ssh_set_connection_info");
-  ssh_set_connection_info(ssh_sesh, hostname, port);
+
+  set_connection_info(ssh_sesh, hostname, port);
 }
 
 
