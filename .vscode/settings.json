@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "libssh2.h": "c",
+        "libssh.h": "c",
+        "knownhosts.h": "c",
+        "string.h": "c",
+        "priv.h": "c",
+        "examples_common.h": "c"
+    }
+}
