@@ -41,9 +41,10 @@ Pointer init_ssh(){
   return initSsh();
 }
 
-void ssh_set_connection_info(Pointer ssh_sesh, Pointer<Utf8> hostname, Int32 port){
+void ssh_set_connection_info(Pointer ssh_sesh, Pointer<Utf8> hostname, int port){
  final Ssh_set_connection_info_dart set_connection_info = myDll
       .lookupFunction<Ssh_set_connection_info_c, Ssh_set_connection_info_dart>("ssh_set_connection_info");
+  ssh_set_connection_info(ssh_sesh, hostname, port);
 }
 
 
@@ -80,9 +81,3 @@ void my_ssh_free(Pointer ssh_sesh){
 }
 
 
-
-void FreeBuffer(Pointer<Utf8> buffer){
-  final FreebufferDart freeBuffer1 =  myDll
-  .lookupFunction<FreebufferC, FreebufferDart>('deallocate_buffer');
-  freeBuffer1(buffer);
-}
