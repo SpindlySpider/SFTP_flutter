@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "my_known_host.h"
+#include "handle.h"
  
 //order to use this ssh handle is
 //init_ssh -> ssh_set_connection_info -> char* try_ssh_connect_server ->verify_host -> try_password_authentication -> do what you need to do
