@@ -11,6 +11,12 @@
 
 // if main sftp ever returns -1 then use the print_ssh_connection_error
 
+int ssh_exit(ssh_session ssh_sesh){
+    ssh_disconnect(ssh_sesh);
+    ssh_free(ssh_sesh);
+    exit(-1);
+}
+
 char* print_ssh_error(ssh_session ssh_sesh){
   const char* error_message = ssh_get_error(ssh_sesh);
   return (char*)error_message;
@@ -20,10 +26,7 @@ char* print_ssh_error(ssh_session ssh_sesh){
 }
 
 
-ssh_session init_ssh(){
-  ssh_session my_ssh_session = ssh_new();
-  return my_ssh_session;
-}
+
 void ssh_set_connection_info(ssh_session ssh_sesh,char* hostname, int port){
   // might cause error because its references in the memory address
   ssh_options_set(ssh_sesh, SSH_OPTIONS_HOST, hostname);
@@ -32,10 +35,8 @@ void ssh_set_connection_info(ssh_session ssh_sesh,char* hostname, int port){
 
 char* try_ssh_connect_server(ssh_session ssh_sesh){
   int rc;
-  printf("ssh_1");
   rc = ssh_connect(ssh_sesh);
   if(rc != SSH_OK){
-    printf(print_ssh_error(ssh_sesh));
     return print_ssh_error(ssh_sesh);
   }
   // if everything is okay it will return a empty string
@@ -44,7 +45,6 @@ char* try_ssh_connect_server(ssh_session ssh_sesh){
 
 int verify_host(ssh_session ssh_sesh,char* error_message){
   int host;
-  printf("verifying host\n");
   host = verify_knownhost(ssh_sesh,error_message);
   printf("verifying host\n");
   printf("%d\n",host);
@@ -58,11 +58,7 @@ int verify_host(ssh_session ssh_sesh,char* error_message){
   return 0;
 }
 
-int ssh_exit(ssh_session ssh_sesh){
-    ssh_disconnect(ssh_sesh);
-    ssh_free(ssh_sesh);
-    exit(-1);
-}
+
 
 char* try_password_authentication(ssh_session ssh_sesh,char* password){
   int rc;
@@ -111,6 +107,11 @@ void deallocate_str(char* string_ptr){
   free(string_ptr);
 }
 
+ssh_session init_ssh(){
+  ssh_session my_ssh_session = ssh_new();
+  return my_ssh_session;
+}
+
 int main(){
   int host;
   ssh_session ssh_sesh = init_ssh();
@@ -119,7 +120,7 @@ int main(){
 
     exit(-1);
   }
-  char* error_message;
+  char* error_message = (char*)malloc(300);
   error_message = try_ssh_connect_server(ssh_sesh); 
   printf(error_message);
   error_message = "";
@@ -141,6 +142,7 @@ int main(){
   printf("finsihied\n");
   my_ssh_disconnect(ssh_sesh);
   my_ssh_free(ssh_sesh);
+  free(error_message);
   return 0;
 }
 

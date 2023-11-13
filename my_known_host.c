@@ -16,7 +16,7 @@ int verify_knownhost(ssh_session session,char* error_message){
     char *p;
     int cmp;
     int rc;
-    char* temp_error_string = "";
+    char temp_error_string[500] = "";
 
     rc = ssh_get_server_publickey(session, &srv_pubkey);
     if(rc <0){
