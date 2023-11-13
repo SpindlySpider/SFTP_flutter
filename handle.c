@@ -42,17 +42,20 @@ char* try_ssh_connect_server(ssh_session ssh_sesh){
   return "connect successful";
 }
 
-int verify_host(ssh_session ssh_sesh){
+int verify_host(ssh_session ssh_sesh,char* error_message){
   int host;
   printf("verifying host\n");
-  host = verify_knownhost(ssh_sesh);
+  host = verify_knownhost(ssh_sesh,error_message);
   printf("verifying host\n");
-  printf("%d\n",host); 
- if (host < 0)
+  printf("%d\n",host);
+  if (host == -2){
+    return host;
+  } 
+  else if (host < 0)
   {
-    
     return ssh_exit(ssh_sesh);
   }
+  return 0;
 }
 
 int ssh_exit(ssh_session ssh_sesh){
@@ -76,23 +79,23 @@ char* try_password_authentication(ssh_session ssh_sesh,char* password){
 }
 
 
-int main_sftp(ssh_session _ssh_session)
-{
-    // needs to grab host name and ssh session, password, port
-  ssh_session my_ssh_session;
-  int rc;
-  char *password;
+// int main_sftp(ssh_session _ssh_session)
+// {
+//     // needs to grab host name and ssh session, password, port
+//   ssh_session my_ssh_session;
+//   int rc;
+//   char *password;
  
-  // Open session and set options
-  if (_ssh_session == NULL)
-    exit(-1);
-  ssh_set_connection_info(_ssh_session,"192.168.1.1",22);
-  try_ssh_connect_server(_ssh_session); // will return string
-  verify_host(_ssh_session); // returns int
+//   // Open session and set options
+//   if (_ssh_session == NULL)
+//     exit(-1);
+//   ssh_set_connection_info(_ssh_session,"192.168.1.1",22);
+//   try_ssh_connect_server(_ssh_session); // will return string
+//   verify_host(_ssh_session); // returns int
  
-  ssh_disconnect(_ssh_session);
-  ssh_free(_ssh_session);
-}
+//   ssh_disconnect(_ssh_session);
+//   ssh_free(_ssh_session);
+// }
 
 
 
@@ -109,6 +112,7 @@ void deallocate_str(char* string_ptr){
 }
 
 int main(){
+  int host;
   ssh_session ssh_sesh = init_ssh();
   ssh_set_connection_info(ssh_sesh,"35.195.25.151",22);
   if (ssh_sesh == NULL){
@@ -118,7 +122,20 @@ int main(){
   char* error_message;
   error_message = try_ssh_connect_server(ssh_sesh); 
   printf(error_message);
-  verify_host(ssh_sesh);
+  error_message = "";
+  host = verify_host(ssh_sesh,error_message);
+  if (host<0){
+    if (host==-2){
+      //add the code for yes or no here, use a pop up :)
+      SSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh,error_message);
+      printf(error_message);
+
+    }
+    else{
+      printf(error_message);
+      ssh_exit(ssh_sesh);
+    }
+  }
   error_message = try_password_authentication(ssh_sesh,"RjHRL4v8"); 
   printf(error_message);
   printf("finsihied\n");
