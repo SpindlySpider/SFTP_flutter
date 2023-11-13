@@ -4,7 +4,7 @@
 #include <string.h>
 #include "my_known_host.h"
 
-int verify_knownhost(ssh_session session){
+int verify_knownhost(ssh_session session,char* error_message){
     // this function will return a integer, need to use helper function to diagnose error message
     //used for ffi so you can actually tell what the error is.
     enum ssh_known_hosts_e state;
@@ -16,6 +16,7 @@ int verify_knownhost(ssh_session session){
     char *p;
     int cmp;
     int rc;
+    char* temp_error_string = "";
 
     rc = ssh_get_server_publickey(session, &srv_pubkey);
     if(rc <0){
@@ -33,14 +34,15 @@ int verify_knownhost(ssh_session session){
     switch (state) {
         case SSH_KNOWN_HOSTS_OK:
             /* OK */
- 
             break;
         case SSH_KNOWN_HOSTS_CHANGED:
-            fprintf(stderr, "Host key for server changed: it is now:\n");
-            ssh_print_hash(SSH_PUBLICKEY_HASH_SHA256, hash, hlen);
-            fprintf(stderr, "For security reasons, connection will be stopped\n");
+            strcat(temp_error_string,"Host key for server changed: it is now:\n");
+            strcat(temp_error_string,"SSH_PUBLICKEY_HASH_SHA256 : ");
+            strcat(temp_error_string,ssh_get_hexa(hash,hlen));
+            strcat(temp_error_string,"\n For security reasons, connection will be stopped\n");
+            error_message = temp_error_string;
             ssh_clean_pubkey_hash(&hash);
- 
+
             return -1;
         case SSH_KNOWN_HOSTS_OTHER:
             fprintf(stderr, "The host key for this server was not found but an other"
@@ -88,6 +90,7 @@ int verify_knownhost(ssh_session session){
     }
  
     ssh_clean_pubkey_hash(&hash);
+    error_message = "ok";
     return 0;
 }
 

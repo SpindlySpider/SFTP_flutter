@@ -50,10 +50,15 @@ int verify_host(ssh_session ssh_sesh){
   printf("%d\n",host); 
  if (host < 0)
   {
+    
+    return ssh_exit(ssh_sesh);
+  }
+}
+
+int ssh_exit(ssh_session ssh_sesh){
     ssh_disconnect(ssh_sesh);
     ssh_free(ssh_sesh);
     exit(-1);
-  }
 }
 
 char* try_password_authentication(ssh_session ssh_sesh,char* password){
@@ -121,3 +126,5 @@ int main(){
   my_ssh_free(ssh_sesh);
   return 0;
 }
+
+

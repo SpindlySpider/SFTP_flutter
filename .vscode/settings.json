@@ -5,6 +5,7 @@
         "knownhosts.h": "c",
         "string.h": "c",
         "priv.h": "c",
-        "examples_common.h": "c"
+        "examples_common.h": "c",
+        "my_known_host.h": "c"
     }
 }
