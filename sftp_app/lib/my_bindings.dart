@@ -13,8 +13,12 @@ typedef Ssh_set_connection_info_dart = void Function(Pointer ssh_sesh, Pointer<U
 typedef Try_ssh_connect_server_c =  Pointer<Utf8> Function(Pointer ssh_sesh);
 typedef Try_ssh_connect_server_dart =  Pointer<Utf8> Function(Pointer ssh_sesh);
 
-typedef Verify_host_c = Int32 Function(Pointer ssh_sesh);
-typedef Verify_host_dart = int Function(Pointer ssh_sesh);
+typedef Verify_host_c = Int32 Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
+typedef Verify_host_dart = int Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
+//UTF8 may cause a error because we are using bigger buffers
+
+
+
 // this one will probbaly cause a issue since there is no way to input yes or no
 
 
@@ -28,6 +32,8 @@ typedef My_ssh_disconnect_dart = void Function(Pointer ssh_sesh);
 typedef My_ssh_free_c = Void Function(Pointer ssh_sesh);
 typedef My_ssh_free_dart = void Function(Pointer ssh_sesh);
 
+typedef SSH_KNOWN_HOSTS_UNKOWN_handle_c = Int32 Function(Pointer ssh_sesh, Pointer<Utf8> error_message); 
+typedef SSH_KNOWN_HOSTS_UNKOWN_handle_dart = int Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
 ////////
 
 
@@ -56,10 +62,10 @@ String try_ssh_connect_server(Pointer ssh_sesh){
       return trySshConnectServer(ssh_sesh).toDartString();
 }
 
-int verify_host(Pointer ssh_sesh){
+int verify_host(Pointer ssh_sesh,Pointer<Utf8> error_message){
   final Verify_host_dart verify_host = myDll
       .lookupFunction<Verify_host_c, Verify_host_dart>("verify_host");
-  return verify_host(ssh_sesh);
+  return verify_host(ssh_sesh,error_message);
 }
 
 String try_password_authentication(Pointer ssh_sesh, String password){
@@ -81,4 +87,8 @@ void my_ssh_free(Pointer ssh_sesh){
   ssh_free(ssh_sesh);
 }
 
-
+int sSH_KNOWN_HOSTS_UNKOWN_handle(Pointer ssh_sesh,Pointer<Utf8> error_message){
+  final SSH_KNOWN_HOSTS_UNKOWN_handle_dart ssh_known_hosts_handle = myDll
+      .lookupFunction<SSH_KNOWN_HOSTS_UNKOWN_handle_c, SSH_KNOWN_HOSTS_UNKOWN_handle_dart>("SSH_KNOWN_HOSTS_UNKOWN_handle");
+  return ssh_known_hosts_handle(ssh_sesh,error_message);
+}

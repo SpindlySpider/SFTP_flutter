@@ -115,7 +115,7 @@ ssh_session init_ssh(){
 int main(){
   int host;
   ssh_session ssh_sesh = init_ssh();
-  ssh_set_connection_info(ssh_sesh,"35.195.25.151",22);
+  ssh_set_connection_info(ssh_sesh,"35.233.120.125",22);
   if (ssh_sesh == NULL){
 
     exit(-1);
