@@ -60,18 +60,16 @@ int verify_host(ssh_session ssh_sesh,char* error_message){
 
 
 
-char* try_password_authentication(ssh_session ssh_sesh,char* password){
+ void try_password_authentication(ssh_session ssh_sesh,char* password,char* error_message){
   int rc;
   rc = ssh_userauth_password(ssh_sesh, NULL, password);
   if (rc != SSH_AUTH_SUCCESS)
   {
-    char* error_message;
     error_message = print_ssh_error(ssh_sesh);
     ssh_disconnect(ssh_sesh);
     ssh_free(ssh_sesh);
-    return error_message;
   }
-  return "password pass";
+  error_message = "";
 }
 
 
@@ -123,7 +121,6 @@ int main(){
   char* error_message = (char*)malloc(300);
   error_message = try_ssh_connect_server(ssh_sesh); 
   printf(error_message);
-  error_message = "";
   host = verify_host(ssh_sesh,error_message);
   if (host<0){
     if (host==-2){
@@ -137,7 +134,7 @@ int main(){
       ssh_exit(ssh_sesh);
     }
   }
-  error_message = try_password_authentication(ssh_sesh,"RjHRL4v8"); 
+  try_password_authentication(ssh_sesh,"RjHRL4v8",error_message); 
   printf(error_message);
   printf("finsihied\n");
   my_ssh_disconnect(ssh_sesh);

@@ -23,8 +23,8 @@ typedef Verify_host_dart = int Function(Pointer ssh_sesh, Pointer<Utf8> error_me
 
 
 
-typedef Try_password_authentication_c = Pointer<Utf8> Function(Pointer ssh_sesh, Pointer<Utf8> password);
-typedef Try_password_authentication_dart = Pointer<Utf8> Function(Pointer ssh_sesh, Pointer<Utf8> password);
+typedef Try_password_authentication_c = Void Function(Pointer ssh_sesh, Pointer<Utf8> password,Pointer<Utf8> error_message);
+typedef Try_password_authentication_dart = void Function(Pointer ssh_sesh, Pointer<Utf8> password,Pointer<Utf8> error_message);
 
 typedef My_ssh_disconnect_c = Void Function(Pointer ssh_sesh);
 typedef My_ssh_disconnect_dart = void Function(Pointer ssh_sesh);
@@ -68,10 +68,10 @@ int verify_host(Pointer ssh_sesh,Pointer<Utf8> error_message){
   return verify_host(ssh_sesh,error_message);
 }
 
-String try_password_authentication(Pointer ssh_sesh, String password){
+void try_password_authentication(Pointer ssh_sesh, String password,Pointer<Utf8> error_message){
   final Try_password_authentication_dart password_verifiction = myDll
       .lookupFunction<Try_password_authentication_c, Try_password_authentication_dart>("try_password_authentication");
-  return password_verifiction(ssh_sesh,password.toNativeUtf8()).toDartString();
+  password_verifiction(ssh_sesh,password.toNativeUtf8(),error_message);
 } 
 
 

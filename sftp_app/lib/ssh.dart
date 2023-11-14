@@ -19,7 +19,6 @@ void main_ssh(String hostname, int port){
   print(error_message.toDartString());
   error_message = "".toNativeUtf8();
   int host = verify_host(ssh_sesh,error_message); 
-
   if(host<0){
     if (host == -2){
       //run pop up code here
@@ -33,10 +32,12 @@ void main_ssh(String hostname, int port){
     }
   }
 
-  error_message = try_password_authentication(ssh_sesh, "RjHRL4v8").toNativeUtf8();
+  try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
   print(error_message.toDartString());
   print("finished");
+  print("error1");
   calloc.free(error_message);
-  my_ssh_disconnect(ssh_sesh);
-  my_ssh_free(ssh_sesh);
+  // my_ssh_disconnect(ssh_sesh);
+  // my_ssh_free(ssh_sesh);
+  // calloc.free(ssh_sesh);
 }
