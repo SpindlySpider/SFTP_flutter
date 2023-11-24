@@ -34,6 +34,10 @@ typedef My_ssh_free_dart = void Function(Pointer ssh_sesh);
 
 typedef SSH_KNOWN_HOSTS_UNKOWN_handle_c = Int32 Function(Pointer ssh_sesh, Pointer<Utf8> error_message); 
 typedef SSH_KNOWN_HOSTS_UNKOWN_handle_dart = int Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
+
+typedef Ssh_exit_c = Int32 Function(Pointer ssh_sesh);
+typedef Ssh_exit_dart = int Function(Pointer ssh_sesh);
+
 ////////
 
 
@@ -91,4 +95,10 @@ int sSH_KNOWN_HOSTS_UNKOWN_handle(Pointer ssh_sesh,Pointer<Utf8> error_message){
   final SSH_KNOWN_HOSTS_UNKOWN_handle_dart ssh_known_hosts_handle = myDll
       .lookupFunction<SSH_KNOWN_HOSTS_UNKOWN_handle_c, SSH_KNOWN_HOSTS_UNKOWN_handle_dart>("SSH_KNOWN_HOSTS_UNKOWN_handle");
   return ssh_known_hosts_handle(ssh_sesh,error_message);
+}
+
+int ssh_exit(Pointer ssh_sesh){
+   final Ssh_exit_dart ssh_exit_ = myDll
+      .lookupFunction<Ssh_exit_c, Ssh_exit_dart>("ssh_exit"); 
+    return ssh_exit_(ssh_sesh);
 }

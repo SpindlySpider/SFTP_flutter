@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "my_known_host.h"
+#define LIBSSH_STATIC 1
  
 //order to use this ssh handle is
 //init_ssh -> ssh_set_connection_info -> char* try_ssh_connect_server ->verify_host -> try_password_authentication -> do what you need to do
@@ -27,7 +28,7 @@ char* print_ssh_error(ssh_session ssh_sesh){
 
 
 
-void ssh_set_connection_info(ssh_session ssh_sesh,char* hostname, int port){
+void ssh_set_connection_info(ssh_session ssh_sesh,const char* hostname, int port){
   // might cause error because its references in the memory address
   ssh_options_set(ssh_sesh, SSH_OPTIONS_HOST, hostname);
   ssh_options_set(ssh_sesh, SSH_OPTIONS_PORT, &port);
@@ -98,7 +99,6 @@ void my_ssh_disconnect(ssh_session ssh_sesh){
 }
 void my_ssh_free(ssh_session ssh_sesh){
   ssh_free(ssh_sesh);
-
 }
 
 void deallocate_str(char* string_ptr){
@@ -106,14 +106,18 @@ void deallocate_str(char* string_ptr){
 }
 
 ssh_session init_ssh(){
-  ssh_session my_ssh_session = ssh_new();
-  return my_ssh_session;
+  return ssh_new();
+  
 }
 
 int main(){
   int host;
-  ssh_session ssh_sesh = init_ssh();
-  ssh_set_connection_info(ssh_sesh,"35.233.120.125",22);
+  ssh_init();
+  //ssh_session ssh_sesh=init_ssh();
+  ssh_session ssh_sesh = ssh_new();
+  int port =22;
+  char* hostname = "146.148.8.45";
+  ssh_set_connection_info(ssh_sesh,hostname,port);
   if (ssh_sesh == NULL){
 
     exit(-1);
@@ -137,9 +141,15 @@ int main(){
   try_password_authentication(ssh_sesh,"RjHRL4v8",error_message); 
   printf(error_message);
   printf("finsihied\n");
-  my_ssh_disconnect(ssh_sesh);
-  my_ssh_free(ssh_sesh);
+  ssh_disconnect(ssh_sesh);
+  printf("2\n");
+  ssh_free(ssh_sesh);
+  ssh_finalize();
+  printf("3\n");
+  fprintf( stdout, "hello world\n" );
+  printf("fsdfdsfsd");
   free(error_message);
+  printf("4\n");
   return 0;
 }
 
