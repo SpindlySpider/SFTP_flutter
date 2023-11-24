@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'text_entry_field.dart';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 import "ssh.dart";
+
+
+Pointer ssh_sesh = nullptr;
 void main() {
   runApp(const MyApp());
 }
@@ -68,7 +73,7 @@ class _LandingPageState extends State<LandingPage> {
                  hostname = hostnameInput.getText();
                  port = int.parse(portInput.getText());
                  print("$hostname $port");
-                 main_ssh(hostname, port);
+                 main_ssh(hostname, port,ssh_sesh);
               
             });
           }, child: Text("connect")),
