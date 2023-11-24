@@ -41,12 +41,15 @@ void main_ssh(String hostname, int port){
   log(error_message.toDartString());
   log("finished");
   calloc.free(error_message);
-  log("error1");
-  log("error2");
-  my_ssh_disconnect(ssh_sesh);
+  exit_ssh(ssh_sesh);
   //ssh_exit(ssh_sesh);
-  my_ssh_free(ssh_sesh);
-  log("error3");
-  ssh_sesh = nullptr;
+  //just use the ssh free to exit program
   // malloc.free(ssh_sesh);
+}
+
+void exit_ssh(Pointer ssh_sesh){
+
+  my_ssh_disconnect(ssh_sesh);
+  my_ssh_free(ssh_sesh);
+
 }
