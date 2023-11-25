@@ -92,6 +92,7 @@ void my_ssh_free(Pointer ssh_sesh){
 }
 
 int sSH_KNOWN_HOSTS_UNKOWN_handle(Pointer ssh_sesh,Pointer<Utf8> error_message){
+  // use this function for the known hosts has changed as the "yes" version of the function
   final SSH_KNOWN_HOSTS_UNKOWN_handle_dart ssh_known_hosts_handle = myDll
       .lookupFunction<SSH_KNOWN_HOSTS_UNKOWN_handle_c, SSH_KNOWN_HOSTS_UNKOWN_handle_dart>("SSH_KNOWN_HOSTS_UNKOWN_handle");
   return ssh_known_hosts_handle(ssh_sesh,error_message);

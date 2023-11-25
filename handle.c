@@ -54,7 +54,8 @@ int verify_host(ssh_session ssh_sesh,char* error_message){
   } 
   else if (host < 0)
   {
-    return ssh_exit(ssh_sesh);
+    //exit 
+    return host;
   }
   return 0;
 }
