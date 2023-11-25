@@ -87,40 +87,46 @@ class _LandingPageState extends State<LandingPage> {
             );
 
             int host = verify_host(ssh_sesh,error_message);
-            print("debug1");
             setState(() {
             status_message = error_message.toDartString();
               
             });
+            print(host);
             if(host<0){
+              print("debug1");
               if (host == -2){
                 //run pop up code here
                 // this is yes to the unknown hosts need to add y/n funcitonality
                 sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
-            setState(() {
+              setState(() {
               
                 status_message = error_message.toDartString();
             });
-              }
-              else{
-                status_message = error_message.toDartString();
+            }
+            else{
             setState(() {
-                status_message = status_message + ", ending session";
+              print(error_message.toDartString());
+                status_message = error_message.toDartString() + ", ending session";
             });
+            calloc.free(error_message);
                 my_ssh_disconnect(ssh_sesh);
                 my_ssh_free(ssh_sesh);
               }
             }
+            else{
 
           try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
+          setState(() {
           status_message = error_message.toDartString();
-          status_message = "SUCCESS";
+          status_message = "SUCCESS";              
+          });
+
           calloc.free(error_message);
-            setState(() {
-              
-            });
             
-          }, child: Text("connect")),
+            }
+
+          }
+          , child: Text("connect")),
 
           Text(status_message)
         ],

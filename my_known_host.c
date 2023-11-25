@@ -16,7 +16,7 @@ int verify_knownhost(ssh_session session,char* error_message){
     char *p;
     int cmp;
     int rc;
-    char temp_error_string[500] = "";
+    char* temp_error_string = (char*)malloc(500);
 
     rc = ssh_get_server_publickey(session, &srv_pubkey);
     if(rc <0){
@@ -76,8 +76,10 @@ int verify_knownhost(ssh_session session,char* error_message){
  
             break;
         case SSH_KNOWN_HOSTS_ERROR:
-            fprintf(stderr, "Error %s", ssh_get_error(session));
+            strcat(temp_error_string,ssh_get_error(session));
+            // fprintf(stderr, "Error %s", ssh_get_error(session));
             ssh_clean_pubkey_hash(&hash);
+        error_message = temp_error_string;
             return -1;
     }
  
