@@ -51,7 +51,6 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    String log="";
     return Scaffold(
       appBar: AppBar(
         backgroundColor:  Color.fromARGB(255, 93, 33, 132),
@@ -71,27 +70,35 @@ class _LandingPageState extends State<LandingPage> {
           ),
           SizedBox(height: 10.0,),
           ElevatedButton(onPressed: (){
-            Pointer<Utf8> error_message = "".toNativeUtf8();
+
+
+            Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
                  hostname = hostnameInput.getText();
                  port = int.parse(portInput.getText());
                 //  main_ssh(hostname, port, ssh_sesh);
                  Pointer ssh_sesh = init_ssh();
-            setState(() {
+
                  print("$hostname $port");
                 //  main_ssh(hostname, port,ssh_sesh);
                  if (ssh_sesh == null){
+
                   status_message = "not initilized";
+
                  }
-            }
-            );
 
             set_connection_info(hostname, port, ssh_sesh, error_message);
-
             int host; 
             setState(() {
             status_message = error_message.toDartString();
-              host = verify_host(ssh_sesh,error_message);
+            });
+            print(error_message.toDartString());
+            error_message = "".toNativeUtf8();
+            host = verify_host(ssh_sesh,error_message);
+            setState(() {
             status_message = error_message.toDartString();
+            });
+            print(error_message.toDartString());
+
             print(host);
             if(host<0){
               print("debug1");
@@ -99,12 +106,12 @@ class _LandingPageState extends State<LandingPage> {
                 //run pop up code here
                 // this is yes to the unknown hosts need to add y/n funcitonality
                 sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
+                print(error_message.toDartString());
                 status_message = error_message.toDartString();}
 
             else{
               print(error_message.toDartString());
                 status_message = error_message.toDartString() + ", ending session";
-            calloc.free(error_message);
             //give popup to quit 
 
                 // my_ssh_disconnect(ssh_sesh);
@@ -112,16 +119,19 @@ class _LandingPageState extends State<LandingPage> {
 
               }
             }
-
-
-
+            else{
 
           try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
           status_message = error_message.toDartString();
           status_message = "SUCCESS";              
-          });
+            }
+
+
 
           calloc.free(error_message);
+
+
+
             
 
           }

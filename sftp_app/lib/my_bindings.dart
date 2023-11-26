@@ -1,8 +1,12 @@
 // lib/my_bindings.dart
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'dart:io';
 import 'package:path/path.dart' as path;
-final dllPath = path.join( 'c', 'mylibrary.dll');
+
+
+final dllPath = path.join( "c", 'mylibrary.dll');
+// final dllPath = path.join( "data","flutter_assets","c", 'mylibrary.dll');
 final DynamicLibrary myDll = DynamicLibrary.open(dllPath);
 
 typedef Init_ssh_c = Pointer Function();
@@ -11,8 +15,8 @@ typedef Init_ssh_dart = Pointer Function();
 typedef Ssh_set_connection_info_c = Void Function(Pointer ssh_sesh, Pointer<Utf8> hostname, Int32 port);
 typedef Ssh_set_connection_info_dart = void Function(Pointer ssh_sesh, Pointer<Utf8> hostname, int port);
 
-typedef Try_ssh_connect_server_c =  Pointer<Utf8> Function(Pointer ssh_sesh);
-typedef Try_ssh_connect_server_dart =  Pointer<Utf8> Function(Pointer ssh_sesh);
+typedef Try_ssh_connect_server_c =  Void Function(Pointer ssh_sesh,Pointer<Utf8> error_message);
+typedef Try_ssh_connect_server_dart =  void Function(Pointer ssh_sesh,Pointer<Utf8> error_message);
 
 typedef Verify_host_c = Int32 Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
 typedef Verify_host_dart = int Function(Pointer ssh_sesh, Pointer<Utf8> error_message);
@@ -61,10 +65,10 @@ void ssh_set_connection_info(Pointer ssh_sesh, Pointer<Utf8> hostname, int port)
 
 
 
-String try_ssh_connect_server(Pointer ssh_sesh){
+void try_ssh_connect_server(Pointer ssh_sesh,Pointer<Utf8> error_message){
  final Try_ssh_connect_server_dart trySshConnectServer = myDll
       .lookupFunction<Try_ssh_connect_server_c, Try_ssh_connect_server_dart>("try_ssh_connect_server");
-      return trySshConnectServer(ssh_sesh).toDartString();
+      trySshConnectServer(ssh_sesh,error_message);
 }
 
 int verify_host(Pointer ssh_sesh,Pointer<Utf8> error_message){

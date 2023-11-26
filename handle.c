@@ -34,14 +34,14 @@ void ssh_set_connection_info(ssh_session ssh_sesh,const char* hostname, int port
   ssh_options_set(ssh_sesh, SSH_OPTIONS_PORT, &port);
 }
 
-char* try_ssh_connect_server(ssh_session ssh_sesh){
+void try_ssh_connect_server(ssh_session ssh_sesh,char* error_message){
   int rc;
   rc = ssh_connect(ssh_sesh);
   if(rc != SSH_OK){
-    return print_ssh_error(ssh_sesh);
+     strcpy(error_message, (char*)ssh_get_error(ssh_sesh));
   }
   // if everything is okay it will return a empty string
-  return "connect successful";
+  strcpy(error_message,"connect successful");
 }
 
 int verify_host(ssh_session ssh_sesh,char* error_message){
@@ -123,19 +123,21 @@ int main(){
 
     exit(-1);
   }
-  char* error_message = (char*)malloc(300);
-  error_message = try_ssh_connect_server(ssh_sesh); 
+  char* error_message = (char*)malloc(250);
+  try_ssh_connect_server(ssh_sesh,error_message); 
   printf(error_message);
+  memset(error_message,0,sizeof(error_message));
+  error_message[0] = '\0';
   host = verify_host(ssh_sesh,error_message);
   if (host<0){
     if (host==-2){
       //add the code for yes or no here, use a pop up :)
       SSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh,error_message);
-      printf(error_message);
+      printf("%s \n",error_message);
 
     }
     else{
-      printf(error_message);
+      printf("%s \n",error_message);
       ssh_exit(ssh_sesh);
     }
   }

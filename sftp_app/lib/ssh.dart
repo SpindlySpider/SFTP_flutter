@@ -14,9 +14,8 @@ void main(){
 
 void set_connection_info(String hostname, int port, Pointer ssh_sesh,Pointer<Utf8> error_message){;
   ssh_set_connection_info(ssh_sesh, hostname.toNativeUtf8(), port);
-  error_message = try_ssh_connect_server(ssh_sesh).toNativeUtf8();
+  try_ssh_connect_server(ssh_sesh,error_message);
   log(error_message.toDartString());
-  error_message = "".toNativeUtf8();
 }
 
 
@@ -24,7 +23,7 @@ void set_connection_info(String hostname, int port, Pointer ssh_sesh,Pointer<Utf
 
 void main_ssh(String hostname, int port, Pointer ssh_sesh){
   ssh_sesh = init_ssh();
-  Pointer<Utf8> error_message = "".toNativeUtf8();
+  Pointer<Utf8> error_message = calloc.allocate<Utf8>(500);
   if (ssh_sesh == null){
     exit(-1);
   }
@@ -42,6 +41,7 @@ void main_ssh(String hostname, int port, Pointer ssh_sesh){
     if (host == -2){
       //run pop up code here
       // this is yes to the unknown hosts need to add y/n funcitonality
+      //buffer overflow
       sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
       log(error_message.toDartString());
     }

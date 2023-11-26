@@ -16,10 +16,11 @@ int verify_knownhost(ssh_session session,char* error_message){
     char *p;
     int cmp;
     int rc;
-    char temp_error_string[500] = "";
+    char temp_error_string[250];
 
     rc = ssh_get_server_publickey(session, &srv_pubkey);
     if(rc <0){
+        strcat(error_message,"could not get server publickey \n");
         return -1;
     }
     rc = ssh_get_publickey_hash(srv_pubkey,
@@ -28,38 +29,44 @@ int verify_knownhost(ssh_session session,char* error_message){
                                 &hlen);
     ssh_key_free(srv_pubkey);
     if (rc < 0) {
+        strcat(error_message,"could not get public key hash");
         return -1;
     }
+    printf("bf1");
+
     state = ssh_session_is_known_server(session);
     switch (state) {
         case SSH_KNOWN_HOSTS_OK:
             /* OK */
             break;
         case SSH_KNOWN_HOSTS_CHANGED:
-            strcat(temp_error_string,"Host key for server changed: it is now:\n");
-            strcat(temp_error_string,"SSH_PUBLICKEY_HASH_SHA256 : ");
-            strcat(temp_error_string,ssh_get_hexa(hash,hlen));
-            strcat(temp_error_string,"\n For security reasons, connection will be stopped\n");
-            error_message = temp_error_string;
+        printf("mk1");
+            strcpy(error_message,"Host key for server changed: it is now:\n");
+            strcat(error_message,"SSH_PUBLICKEY_HASH_SHA256 : ");
+            strcat(error_message,(char*)ssh_get_hexa(hash,hlen));
+            strcat(error_message,"\n For security reasons, connection will be stopped\n ");
+            // strcpy(error_message,temp_error_string);
             ssh_clean_pubkey_hash(&hash);
 
             return -1;
         case SSH_KNOWN_HOSTS_OTHER:
-            strcat(temp_error_string,"The host key for this server was not found but an other"
+        printf("mk2");
+            strcpy(error_message,"The host key for this server was not found but an other"
                     "type of key exists.\n");
-            strcat(temp_error_string,"An attacker might change the default server key to"
-                    "confuse your client into thinking the key does not exist\n");
+            strcat(error_message,"An attacker might change the default server key to"
+                    "confuse your client into thinking the key does not exist\n ");
             ssh_clean_pubkey_hash(&hash);
-            error_message = temp_error_string;
- 
+        //    strcpy(error_message, temp_error_string);
             return -1;
         case SSH_KNOWN_HOSTS_NOT_FOUND:
-            strcat(temp_error_string,"Could not find known host file.\n If you accept the host key here, the file will be automatically created.\n");
-            error_message = temp_error_string;
+        printf("mk3");
+            strcpy(error_message,"Could not find known host file.\n If you accept the host key here, the file will be automatically created.\n");
+            // strcpy(error_message, temp_error_string);
             /* FALL THROUGH to SSH_SERVER_NOT_KNOWN behavior */
  
         case SSH_KNOWN_HOSTS_UNKNOWN:
         // type yes here and it will work
+        printf("mk4");
             hexa = ssh_get_hexa(hash, hlen);
             fprintf(stderr,"The server is unknown. Do you trust the host key?\n");
             fprintf(stderr, "Public key hash: %s\n", hexa);
@@ -76,15 +83,18 @@ int verify_knownhost(ssh_session session,char* error_message){
  
             break;
         case SSH_KNOWN_HOSTS_ERROR:
-            strcat(temp_error_string,ssh_get_error(session));
+        printf("mk5");
+            strcpy(error_message, (char*)ssh_get_error(session));
             // fprintf(stderr, "Error %s", ssh_get_error(session));
             ssh_clean_pubkey_hash(&hash);
-        error_message = temp_error_string;
+            // strcpy(error_message, temp_error_string);
+
             return -1;
     }
  
     ssh_clean_pubkey_hash(&hash);
-    error_message = "ok";
+    sprintf(error_message,"ok");
+
     return 0;
 }
 
@@ -101,10 +111,10 @@ int SSH_KNOWN_HOSTS_UNKOWN_handle(ssh_session ssh_sesh,char* error_message){
     rc = ssh_session_update_known_hosts(ssh_sesh);
         if (rc < 0) {
             strcat(error_str_temp, strerror(errno));
-            error_message = error_str_temp;
+            strcpy(error_message,error_str_temp);
             return -1;
         }
     ssh_clean_pubkey_hash(&hash);
-    error_message = "ok";
+    strcpy(error_message,"ok");
     return 0;
 }
