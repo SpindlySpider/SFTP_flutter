@@ -6,7 +6,7 @@ import 'package:ffi/ffi.dart';
 import "ssh.dart";
 
 
-Pointer ssh_sesh = nullptr;
+
 void main() {
   runApp(const MyApp());
 }
@@ -74,23 +74,24 @@ class _LandingPageState extends State<LandingPage> {
             Pointer<Utf8> error_message = "".toNativeUtf8();
                  hostname = hostnameInput.getText();
                  port = int.parse(portInput.getText());
+                //  main_ssh(hostname, port, ssh_sesh);
+                 Pointer ssh_sesh = init_ssh();
             setState(() {
                  print("$hostname $port");
                 //  main_ssh(hostname, port,ssh_sesh);
-                 Pointer ssh_sesh = init_ssh();
                  if (ssh_sesh == null){
                   status_message = "not initilized";
                  }
-                set_connection_info(hostname, port, ssh_sesh, error_message);
-                status_message = error_message.toDartString();
             }
             );
 
-            int host = verify_host(ssh_sesh,error_message);
+            set_connection_info(hostname, port, ssh_sesh, error_message);
+
+            int host; 
             setState(() {
             status_message = error_message.toDartString();
-              
-            });
+              host = verify_host(ssh_sesh,error_message);
+            status_message = error_message.toDartString();
             print(host);
             if(host<0){
               print("debug1");
@@ -98,32 +99,30 @@ class _LandingPageState extends State<LandingPage> {
                 //run pop up code here
                 // this is yes to the unknown hosts need to add y/n funcitonality
                 sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
-              setState(() {
-              
-                status_message = error_message.toDartString();
-            });
-            }
+                status_message = error_message.toDartString();}
+
             else{
-            setState(() {
               print(error_message.toDartString());
                 status_message = error_message.toDartString() + ", ending session";
-            });
             calloc.free(error_message);
-                my_ssh_disconnect(ssh_sesh);
-                my_ssh_free(ssh_sesh);
+            //give popup to quit 
+
+                // my_ssh_disconnect(ssh_sesh);
+                // my_ssh_free(ssh_sesh);
+
               }
             }
-            else{
+
+
+
 
           try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
-          setState(() {
           status_message = error_message.toDartString();
           status_message = "SUCCESS";              
           });
 
           calloc.free(error_message);
             
-            }
 
           }
           , child: Text("connect")),

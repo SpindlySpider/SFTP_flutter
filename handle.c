@@ -117,7 +117,7 @@ int main(){
   //ssh_session ssh_sesh=init_ssh();
   ssh_session ssh_sesh = ssh_new();
   int port =22;
-  char* hostname = "146.148.8.45";
+  char* hostname = "146.148.127.82";
   ssh_set_connection_info(ssh_sesh,hostname,port);
   if (ssh_sesh == NULL){
 
