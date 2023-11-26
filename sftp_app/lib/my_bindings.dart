@@ -2,7 +2,7 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart' as path;
-  final dllPath = path.join( 'c', 'mylibary.dll');
+final dllPath = path.join( 'c', 'mylibrary.dll');
 final DynamicLibrary myDll = DynamicLibrary.open(dllPath);
 
 typedef Init_ssh_c = Pointer Function();
