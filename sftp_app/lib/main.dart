@@ -46,8 +46,8 @@ class _LandingPageState extends State<LandingPage> {
   String status_message = "";
   CustomInputField hostnameInput = CustomInputField(labelText: "hostname",showPassword:true ,icon: Icon(Icons.wifi_tethering_sharp),controller_: TextEditingController(),);
   CustomInputField portInput =CustomInputField(labelText: "port",showPassword:true ,icon: Icon(Icons.tag),controller_: TextEditingController());
-        
-
+  late Pointer ssh_sesh ;
+Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +69,13 @@ class _LandingPageState extends State<LandingPage> {
             ],
           ),
           SizedBox(height: 10.0,),
-          ElevatedButton(onPressed: (){
-
-
-            Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
+          ElevatedButton(onPressed: ()async{
                  hostname = hostnameInput.getText();
                  port = int.parse(portInput.getText());
                 //  main_ssh(hostname, port, ssh_sesh);
-                 Pointer ssh_sesh = init_ssh();
+                
 
+                ssh_sesh = init_ssh();
                  print("$hostname $port");
                 //  main_ssh(hostname, port,ssh_sesh);
                  if (ssh_sesh == null){
@@ -85,8 +83,8 @@ class _LandingPageState extends State<LandingPage> {
                   status_message = "not initilized";
 
                  }
-
-            set_connection_info(hostname, port, ssh_sesh, error_message);
+                 
+           set_connection_info(hostname, port, ssh_sesh, error_message);
             int host; 
             setState(() {
             status_message = error_message.toDartString();
@@ -94,45 +92,54 @@ class _LandingPageState extends State<LandingPage> {
             print(error_message.toDartString());
             error_message = "".toNativeUtf8();
             host = verify_host(ssh_sesh,error_message);
-            setState(() {
+
             status_message = error_message.toDartString();
-            });
             print(error_message.toDartString());
 
             print(host);
             if(host<0){
-              print("debug1");
               if (host == -2){
                 //run pop up code here
                 // this is yes to the unknown hosts need to add y/n funcitonality
                 sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
                 print(error_message.toDartString());
-                status_message = error_message.toDartString();}
+                status_message = error_message.toDartString();
+                //if user wants to accept use host = 0
+                host = 0;
+                }
 
             else{
               print(error_message.toDartString());
-                status_message = error_message.toDartString() + ", ending session";
+              setState(() {
+                status_message = error_message.toDartString() + ",ending session";
+                
+              });
             //give popup to quit 
-
                 // my_ssh_disconnect(ssh_sesh);
                 // my_ssh_free(ssh_sesh);
+                // ssh_sesh = nullptr;
+                // calloc.free(error_message);
 
               }
+            }
+            if (host != 0){
+                // my_ssh_disconnect(ssh_sesh);
+                // my_ssh_free(ssh_sesh);
+                // ssh_sesh = nullptr;
+                // calloc.free(error_message);
+              //exit
             }
             else{
 
           try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
           status_message = error_message.toDartString();
           status_message = "SUCCESS";              
+          calloc.free(error_message);
             }
 
 
 
-          calloc.free(error_message);
 
-
-
-            
 
           }
           , child: Text("connect")),
