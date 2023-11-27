@@ -12,10 +12,10 @@ void main(){
 
 
 
-void set_connection_info(String hostname, int port, Pointer ssh_sesh,Pointer<Utf8> error_message){;
+void set_connection_info(String hostname, int port, Pointer ssh_sesh,Pointer<Utf8> error_message)
+{
   ssh_set_connection_info(ssh_sesh, hostname.toNativeUtf8(), port);
-  try_ssh_connect_server(ssh_sesh,error_message);
-  log(error_message.toDartString());
+ 
 }
 
 

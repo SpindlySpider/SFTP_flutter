@@ -6,12 +6,13 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import "my_bindings.dart";
 import "ssh.dart";
+//might not be working becaues the bidnings are messed up?
 
 void isolate_ssh_initilize(SendPort sendPort) async{
   //communication through lists, [message, ?object]
   ReceivePort receivePort = ReceivePort();
   Pointer ssh_sesh =init_ssh();
-  Pointer<Utf8> error_message = calloc.allocate<Utf8>(250) ;
+  Pointer<Utf8> error_message = "".toNativeUtf8();
   int host; 
   sendPort.send(receivePort.sendPort);
   receivePort.listen((message) {
@@ -20,8 +21,9 @@ void isolate_ssh_initilize(SendPort sendPort) async{
       //message lists are used to send data of host name and port
       print("setting connection info");
       set_connection_info(message[1], message[2], ssh_sesh, error_message);
+      try_ssh_connect_server(ssh_sesh, error_message);
       sendPort.send(["error",error_message.toDartString()]);
-      error_message = "".toNativeUtf8();
+      // error_message = "".toNativeUtf8();
     }
     else if(message[0] == "verify_host"){
       print("verifying host");
@@ -49,14 +51,15 @@ void isolate_ssh_initilize(SendPort sendPort) async{
 
       else{
         print(error_message.toDartString());
+
         sendPort.send(["error",error_message.toDartString()+ ",ending session"]);
-      //give popup to quit 
-          my_ssh_disconnect(ssh_sesh);
-          my_ssh_free(ssh_sesh);
-          // receivePort.close();
-          sendPort.send(["error","exit"]);
-          Isolate.current.kill(priority: Isolate.immediate);
-          
+        //give popup to quit
+        my_ssh_disconnect(ssh_sesh);
+        my_ssh_free(ssh_sesh); 
+        ssh_sesh =nullptr;
+
+        receivePort.close();
+        sendPort.send(["error","exit"]);
           
           // ssh_sesh = nullptr;
           // calloc.free(error_message);

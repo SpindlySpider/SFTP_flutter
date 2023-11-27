@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 
 
 class HomePageState extends State<HomePage> {
+  GlobalKey<LandingPageState> landingPageKeys = GlobalKey<LandingPageState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,8 +25,13 @@ class HomePageState extends State<HomePage> {
       body: Column(
         children: [
           ElevatedButton(onPressed: (){
+            setState(() {
+            landingPageKeys.currentState?.dispose();
+            landingPageKeys = GlobalKey<LandingPageState>();
             Navigator.push(context,
-            MaterialPageRoute(builder: (context) => LandingPage()));
+            MaterialPageRoute(builder: (context) => LandingPage(key: landingPageKeys)));
+              
+            });
           }, child: Text("ssh"))
 
         ],

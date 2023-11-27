@@ -6,13 +6,14 @@ import 'package:ffi/ffi.dart';
 import "dart:isolate";
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+  LandingPage({Key? key}) : super(key: key);
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  State<LandingPage> createState() => LandingPageState();
 }
 
 
-class _LandingPageState extends State<LandingPage> {
+class LandingPageState extends State<LandingPage> {
+
   String hostname = "";
   int port = 22;
   String status_message = "";
@@ -61,6 +62,7 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
                 sshSendPort = message;
             sshSendPort.send(["set_connection_info",hostname,port]);
               }
+              
               else if( message[0] == "error"){
                 if(message[1]=="connect successful"){
 
@@ -68,7 +70,9 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
                 }
                 else if (message[1] == "exit"){
                   //try to kill process before crash
+                  Navigator.pop(context);
                   ssh_initilize.kill(priority: Isolate.immediate);
+                  // super.dispose();
                 }
                 else{
                 print(message[1]);
