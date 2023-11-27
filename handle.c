@@ -15,6 +15,7 @@
 int ssh_exit(ssh_session ssh_sesh){
     ssh_disconnect(ssh_sesh);
     ssh_free(ssh_sesh);
+    ssh_finalize();
     exit(-1);
 }
 
@@ -28,20 +29,37 @@ char* print_ssh_error(ssh_session ssh_sesh){
 
 
 
-void ssh_set_connection_info(ssh_session ssh_sesh,const char* hostname, int port){
+void ssh_set_connection_info(ssh_session ssh_sesh,char* hostname, int port){
   // might cause error because its references in the memory address
   ssh_options_set(ssh_sesh, SSH_OPTIONS_HOST, hostname);
   ssh_options_set(ssh_sesh, SSH_OPTIONS_PORT, &port);
 }
 
 void try_ssh_connect_server(ssh_session ssh_sesh,char* error_message){
+  strcpy(error_message, "SOMTHING");
   int rc;
   rc = ssh_connect(ssh_sesh);
-  if(rc != SSH_OK){
-     strcpy(error_message, (char*)ssh_get_error(ssh_sesh));
+  if(rc == SSH_ERROR){
+    rc =  ssh_get_error_code(ssh_sesh);
+    if(rc == SSH_REQUEST_DENIED){
+     strcpy(error_message, "ssh request denied");
+    }
+    else if(rc == SSH_FATAL){
+     strcpy(error_message, "ssh fatal");
+    }
+    else{
+      strcpy(error_message, "other");
+    }
   }
+  else if (rc==SSH_OK){
+    strcpy(error_message,"connect successful");
   // if everything is okay it will return a empty string
-  strcpy(error_message,"connect successful");
+  }
+  else{
+    strcpy(error_message,"other error");
+  }
+
+  
 }
 
 int verify_host(ssh_session ssh_sesh,char* error_message){
@@ -107,6 +125,7 @@ void deallocate_str(char* string_ptr){
 }
 
 ssh_session init_ssh(){
+  ssh_init();
   return ssh_new();
   
 }
@@ -117,7 +136,7 @@ int main(){
   //ssh_session ssh_sesh=init_ssh();
   ssh_session ssh_sesh = ssh_new();
   int port =22;
-  char* hostname = "146.148.127.82";
+  char* hostname = "104.199.4.219";
   ssh_set_connection_info(ssh_sesh,hostname,port);
   if (ssh_sesh == NULL){
 
@@ -138,20 +157,23 @@ int main(){
     }
     else{
       printf("%s \n",error_message);
-      ssh_exit(ssh_sesh);
+      //ssh_exit(ssh_sesh);
     }
   }
+  else{
   try_password_authentication(ssh_sesh,"RjHRL4v8",error_message); 
+
+  }
   printf(error_message);
-  printf("finsihied\n");
   ssh_disconnect(ssh_sesh);
+  printf("finsihied\n");
   printf("2\n");
   ssh_free(ssh_sesh);
   ssh_finalize();
   printf("3\n");
   fprintf( stdout, "hello world\n" );
   printf("fsdfdsfsd");
-  free(error_message);
+  // free(error_message);
   printf("4\n");
   return 0;
 }
