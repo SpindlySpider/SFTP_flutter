@@ -7,30 +7,33 @@ import 'package:flutter/material.dart';
 import "my_bindings.dart";
 import "ssh.dart";
 
-void isolate_ssh_initilize(SendPort sendPort){
+void isolate_ssh_initilize(SendPort sendPort) async{
   //communication through lists, [message, ?object]
-  Pointer ssh = "".toNativeUtf8();
   ReceivePort receivePort = ReceivePort();
   Pointer ssh_sesh =init_ssh();
   Pointer<Utf8> error_message = calloc.allocate<Utf8>(250) ;
   int host; 
+  sendPort.send(receivePort.sendPort);
   receivePort.listen((message) {
+    print("reve");
     if(message[0] == "set_connection_info"){
       //message lists are used to send data of host name and port
+      print("setting connection info");
       set_connection_info(message[1], message[2], ssh_sesh, error_message);
       sendPort.send(["error",error_message.toDartString()]);
       error_message = "".toNativeUtf8();
     }
     else if(message[0] == "verify_host"){
+      print("verifying host");
       host = verify_host(ssh_sesh,error_message);
 
       sendPort.send(["error",error_message.toDartString()]);
-      print(error_message.toDartString());
+      // print(error_message.toDartString());
 
       host = verify_host(ssh_sesh,error_message);
 
       sendPort.send(["error",error_message.toDartString()]);
-      print(error_message.toDartString());
+      // print(error_message.toDartString());
 
       print(host);
       if(host<0){
@@ -48,8 +51,13 @@ void isolate_ssh_initilize(SendPort sendPort){
         print(error_message.toDartString());
         sendPort.send(["error",error_message.toDartString()+ ",ending session"]);
       //give popup to quit 
-          // my_ssh_disconnect(ssh_sesh);
-          // my_ssh_free(ssh_sesh);
+          my_ssh_disconnect(ssh_sesh);
+          my_ssh_free(ssh_sesh);
+          // receivePort.close();
+          sendPort.send(["error","exit"]);
+          Isolate.current.kill(priority: Isolate.immediate);
+          
+          
           // ssh_sesh = nullptr;
           // calloc.free(error_message);
 

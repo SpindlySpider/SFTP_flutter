@@ -1,30 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
-import "ssh.dart";
 import "dart:isolate";
-import "landing_page.dart";
 
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: const LandingPage(),
-    );
-  }
-}
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
