@@ -43,6 +43,8 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
           ),
           SizedBox(height: 10.0,),
           ElevatedButton(onPressed: ()async {
+
+            // verify if host name and port are vaild
             setState(() {
               
             });
@@ -65,7 +67,6 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
               
               else if( message[0] == "error"){
                 if(message[1]=="connect successful"){
-
                   sshSendPort.send(["verify_host"]);
                 }
                 else if (message[1] == "exit"){
@@ -73,6 +74,14 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
                   Navigator.pop(context);
                   ssh_initilize.kill(priority: Isolate.immediate);
                   // super.dispose();
+                }
+                else if (message[1] == "ssh fatal"){
+                  //try to kill process before crash
+                  setState(() {
+                    status_message = message[1];
+                  });
+                  Navigator.pop(context);
+                  // ssh_initilize.kill(priority: Isolate.immediate);
                 }
                 else{
                 print(message[1]);

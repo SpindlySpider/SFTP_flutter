@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
@@ -11,32 +12,38 @@ import "ssh.dart";
 void isolate_ssh_initilize(SendPort sendPort) async{
   //communication through lists, [message, ?object]
   ReceivePort receivePort = ReceivePort();
-  Pointer ssh_sesh =init_ssh();
+  late Pointer ssh_sesh;
   Pointer<Utf8> error_message = "".toNativeUtf8();
   int host; 
   sendPort.send(receivePort.sendPort);
+
+
   receivePort.listen((message) {
     print("reve");
+
     if(message[0] == "set_connection_info"){
+      ssh_sesh =init_ssh();
       //message lists are used to send data of host name and port
       print("setting connection info");
       set_connection_info(message[1], message[2], ssh_sesh, error_message);
       try_ssh_connect_server(ssh_sesh, error_message);
+
       sendPort.send(["error",error_message.toDartString()]);
+      if(error_message.toDartString()=="ssh fatal"){
+        Isolate.exit();
+      }
       // error_message = "".toNativeUtf8();
     }
+
+
     else if(message[0] == "verify_host"){
       print("verifying host");
       host = verify_host(ssh_sesh,error_message);
-
       sendPort.send(["error",error_message.toDartString()]);
       // print(error_message.toDartString());
-
       host = verify_host(ssh_sesh,error_message);
-
       sendPort.send(["error",error_message.toDartString()]);
       // print(error_message.toDartString());
-
       print(host);
       if(host<0){
         if (host == -2){
@@ -44,11 +51,11 @@ void isolate_ssh_initilize(SendPort sendPort) async{
           // this is yes to the unknown hosts need to add y/n funcitonality
           sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
           print(error_message.toDartString());
-          sendPort.send(["error",error_message.toDartString()]);;
+          sendPort.send(["error",error_message.toDartString()]);
+
           //if user wants to accept use host = 0
           host = 0;
           }
-
       else{
         print(error_message.toDartString());
 

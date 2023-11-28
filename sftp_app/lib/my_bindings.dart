@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 
-final dllPath = path.join( "c", 'mylibrary.dll');
-// final dllPath = path.join( "data","flutter_assets","c", 'mylibrary.dll');
+// final dllPath = path.join( "c", 'mylibrary.dll');
+final dllPath = path.join( "data","flutter_assets","c", 'mylibrary.dll');
 final DynamicLibrary myDll = DynamicLibrary.open(dllPath);
 
 typedef Init_ssh_c = Pointer Function();
@@ -43,12 +43,20 @@ typedef SSH_KNOWN_HOSTS_UNKOWN_handle_dart = int Function(Pointer ssh_sesh, Poin
 typedef Ssh_exit_c = Int32 Function(Pointer ssh_sesh);
 typedef Ssh_exit_dart = int Function(Pointer ssh_sesh);
 
+typedef My_ssh_finlize_c = Void Function();
+typedef My_ssh_finlize_dart = void Function();
+
 ////////
 
 
 typedef FreebufferC = Void Function(Pointer<Utf8> buffer);
 typedef FreebufferDart = void Function(Pointer<Utf8> buffer);
 
+void my_ssh_finlize(){
+  final My_ssh_finlize_dart ssh_final = myDll
+      .lookupFunction<My_ssh_finlize_c, My_ssh_finlize_dart>("my_ssh_finalize");
+  ssh_final();
+}
 
 Pointer init_ssh(){
   final Init_ssh_dart initSsh = myDll

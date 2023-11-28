@@ -119,10 +119,13 @@ void my_ssh_disconnect(ssh_session ssh_sesh){
 void my_ssh_free(ssh_session ssh_sesh){
   ssh_free(ssh_sesh);
 }
-
+void my_ssh_finalize(){
+  ssh_finalize();
+}
 void deallocate_str(char* string_ptr){
   free(string_ptr);
 }
+
 
 ssh_session init_ssh(){
   ssh_init();
