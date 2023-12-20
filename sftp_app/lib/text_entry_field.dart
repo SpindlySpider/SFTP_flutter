@@ -28,20 +28,19 @@ class _CustomInputFieldState extends State<CustomInputField> {
     return TextField(
       obscureText: !widget.showPassword,
       decoration: InputDecoration(
-        labelText: widget.labelText,
-        prefixIcon: widget.icon ?? widget.icon,
-        suffixIcon:widget.showEye? IconButton(
-          icon: Icon(
-            Icons.remove_red_eye,
-            color: widget.showPassword ? Colors.blue : Colors.grey,
-          ),
-          onPressed: () {
-            setState(() => widget.showPassword = !widget.showPassword);
-          },
-        )
-        :null
-
-      ),
+          labelText: widget.labelText,
+          prefixIcon: widget.icon ?? widget.icon,
+          suffixIcon: widget.showEye
+              ? IconButton(
+                  icon: Icon(
+                    Icons.remove_red_eye,
+                    color: widget.showPassword ? Colors.blue : Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() => widget.showPassword = !widget.showPassword);
+                  },
+                )
+              : null),
       onChanged: (String intext) {
         setState(() {
           widget.controller_.text = intext;

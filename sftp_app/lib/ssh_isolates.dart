@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:isolate';
 import 'package:flutter/material.dart';
 import "error_popup.dart";
 import 'package:dartssh2/dartssh2.dart';
@@ -35,62 +34,55 @@ Future<SSHClient?> ssh_setup(String hostname, int port, String username,
   try {
     if (password == "") {
       password = await popupDialogeGetText(
-          buildContext, "please enter the remote host password", "SSH").then((passwordStr) async{
-            
-       var client = await ssh_setup_initlize(
-          hostname, port, username, buildContext, passwordStr).then((sshClient) async{
-
-      var uptime = await sshClient?.run('uptime');
-      print(utf8.decode(uptime!));
-      return sshClient;
-          });
-      return client;
-          }
-          
-          );
-          
-    }
-    else {
+              buildContext, "please enter the remote host password", "SSH")
+          .then((passwordStr) async {
+        var client = await ssh_setup_initlize(
+                hostname, port, username, buildContext, passwordStr)
+            .then((sshClient) async {
+          var uptime = await sshClient?.run('uptime');
+          print(utf8.decode(uptime!));
+          return sshClient;
+        });
+        return client;
+      });
+    } else {
       var client = await ssh_setup_initlize(
-          hostname, port, username, buildContext, password).then((sshClient) async{
-      var uptime = await sshClient?.run('uptime');
-      print(utf8.decode(uptime!));
-      return sshClient;
-
-          });
-    return client;
-
-
+              hostname, port, username, buildContext, password)
+          .then((sshClient) async {
+        var uptime = await sshClient?.run('uptime');
+        print(utf8.decode(uptime!));
+        return sshClient;
+      });
+      return client;
     }
-  }
-  catch (e) {
+  } catch (e) {
     popupDialoge(buildContext, "$e", "ssh error");
   }
 }
 
-void gfdsfdsfds(SendPort sendport) {
-  String password;
-  ReceivePort ssh_receive_port = ReceivePort();
+// void gfdsfdsfds(SendPort sendport) {
+//   String password;
+//   ReceivePort ssh_receive_port = ReceivePort();
 
-  sendport.send(ssh_receive_port.sendPort);
+//   sendport.send(ssh_receive_port.sendPort);
 
-  ssh_receive_port.listen((message) async {
-    if (message[0] == "setup") {
-      // setup needs hostname, port and username
-      //might need to have error call back
-      //not sure how to handle get password
-      // maybe start the ssh then isolate to handle everything
-      //TODO make isolate handle the ssh connection only communicating with main thread when needed for ui updates
-      try {
-        var client = SSHClient(await SSHSocket.connect(message[1], message[2]),
-            username: message[3], onPasswordRequest: () => message[4]);
+//   ssh_receive_port.listen((message) async {
+//     if (message[0] == "setup") {
+//       // setup needs hostname, port and username
+//       //might need to have error call back
+//       //not sure how to handle get password
+//       // maybe start the ssh then isolate to handle everything
+//       //TODO make isolate handle the ssh connection only communicating with main thread when needed for ui updates
+//       try {
+//         var client = SSHClient(await SSHSocket.connect(message[1], message[2]),
+//             username: message[3], onPasswordRequest: () => message[4]);
 
-        sendport.send(["setup", client]);
-      } catch (e) {
-        String error = "$e";
-        print(error);
-        sendport.send(["error", error]);
-      }
-    }
-  });
-}
+//         sendport.send(["setup", client]);
+//       } catch (e) {
+//         String error = "$e";
+//         print(error);
+//         sendport.send(["error", error]);
+//       }
+//     }
+//   });
+// }

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
-import "dart:isolate";
 
 Future<void> popupDialoge(
     BuildContext context, String errorMsg, String title) async {
@@ -56,10 +53,12 @@ Future<String?> popupDialogeGetText(
               children: [
                 Text(description),
                 passwordInput,
-                ElevatedButton(onPressed: () {
-                  password = passwordInput.getText();
-                  Navigator.pop(context,password);
-                }, child: Text("finish"))
+                ElevatedButton(
+                    onPressed: () {
+                      password = passwordInput.getText();
+                      Navigator.pop(context, password);
+                    },
+                    child: Text("finish"))
               ],
             )
           ],
