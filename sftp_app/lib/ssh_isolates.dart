@@ -5,89 +5,40 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
-import "my_bindings.dart";
 import "ssh.dart";
-//might not be working becaues the bidnings are messed up?
+import 'package:dartssh2/dartssh2.dart';
 
-void isolate_ssh_initilize(SendPort sendPort) async{
-  //communication through lists, [message, ?object]
-  ReceivePort receivePort = ReceivePort();
-  late Pointer ssh_sesh;
-  Pointer<Utf8> error_message = "".toNativeUtf8();
-  int host; 
-  sendPort.send(receivePort.sendPort);
+void ssh_setup(SendPort sendport){
+  String password;
+  ReceivePort ssh_receive_port = ReceivePort();
 
+  sendport.send(ssh_receive_port.sendPort);
 
-  receivePort.listen((message) {
-    print("reve");
+  ssh_receive_port.listen((message) async {
+    if(message[0] == "setup"){
+      // setup needs hostname, port and username
+      //might need to have error call back
+      //not sure how to handle get password
+      // maybe start the ssh then isolate to handle everything
+      //TODO make setup not a isolate
+      //TODO make isolate handle the ssh connection only communicating with main thread when needed for ui updates
+      try{
+      var client = SSHClient(
+        await SSHSocket.connect(message[1],message[2] ),
+        username: message[3],
+        onPasswordRequest: () => message[4]
+        );
 
-    if(message[0] == "set_connection_info"){
-      ssh_sesh =init_ssh();
-      //message lists are used to send data of host name and port
-      print("setting connection info");
-      set_connection_info(message[1], message[2], ssh_sesh, error_message);
-      try_ssh_connect_server(ssh_sesh, error_message);
+      sendport.send(["setup",client]);
 
-      sendPort.send(["error",error_message.toDartString()]);
-      if(error_message.toDartString()=="ssh fatal"){
-        Isolate.exit();
       }
-      // error_message = "".toNativeUtf8();
-    }
-
-
-    else if(message[0] == "verify_host"){
-      print("verifying host");
-      host = verify_host(ssh_sesh,error_message);
-      sendPort.send(["error",error_message.toDartString()]);
-      // print(error_message.toDartString());
-      host = verify_host(ssh_sesh,error_message);
-      sendPort.send(["error",error_message.toDartString()]);
-      // print(error_message.toDartString());
-      print(host);
-      if(host<0){
-        if (host == -2){
-          //run pop up code here
-          // this is yes to the unknown hosts need to add y/n funcitonality
-          sSH_KNOWN_HOSTS_UNKOWN_handle(ssh_sesh, error_message);
-          print(error_message.toDartString());
-          sendPort.send(["error",error_message.toDartString()]);
-
-          //if user wants to accept use host = 0
-          host = 0;
-          }
-      else{
-        print(error_message.toDartString());
-
-        sendPort.send(["error",error_message.toDartString()+ ",ending session"]);
-        //give popup to quit
-        my_ssh_disconnect(ssh_sesh);
-        my_ssh_free(ssh_sesh); 
-        ssh_sesh =nullptr;
-
-        receivePort.close();
-        sendPort.send(["error","exit"]);
-          
-          // ssh_sesh = nullptr;
-          // calloc.free(error_message);
-
-        }
-      }
-      if (host != 0){
-          // my_ssh_disconnect(ssh_sesh);
-          // my_ssh_free(ssh_sesh);
-          // ssh_sesh = nullptr;
-          // calloc.free(error_message);
-        //exit
+      catch(e){
+        String error = "$e";
+        print(error);
+        sendport.send(["error",error]);
       }
     }
-    else if(message[0] == "try_password_authentication"){
-      //[password_auth, password]
-          try_password_authentication(ssh_sesh, "RjHRL4v8",error_message);
-          // status_message = error_message.toDartString();
-          // status_message = "SUCCESS";
-          sendPort.send(["error",error_message.toDartString()]);
-    }
-}
-);
+  });
+
+
 }
