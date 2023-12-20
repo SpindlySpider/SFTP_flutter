@@ -6,10 +6,9 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import "dart:isolate";
 
-
-
-Future<void> popupDialoge(BuildContext context,String errorMsg,String title) async {
-    return showDialog<void>(
+Future<void> popupDialoge(
+    BuildContext context, String errorMsg, String title) async {
+  return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -29,6 +28,40 @@ Future<void> popupDialoge(BuildContext context,String errorMsg,String title) asy
                 Navigator.of(context).pop();
               },
             ),
+          ],
+        );
+      });
+}
+
+Future<String?> popupDialogeGetText(
+    // need to use await so you can get the return type of the password
+    BuildContext context,
+    String description,
+    String title) async {
+  String password = "";
+  CustomInputField passwordInput = CustomInputField(
+    labelText: "password",
+    showPassword: false,
+    icon: Icon(Icons.tag),
+    controller_: TextEditingController(),
+    showEye: true,
+  );
+  return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(title),
+          children: [
+            Column(
+              children: [
+                Text(description),
+                passwordInput,
+                ElevatedButton(onPressed: () {
+                  password = passwordInput.getText();
+                  Navigator.pop(context,password);
+                }, child: Text("finish"))
+              ],
+            )
           ],
         );
       });

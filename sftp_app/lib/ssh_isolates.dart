@@ -1,44 +1,102 @@
-
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:html';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:js';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import "ssh.dart";
+import "error_popup.dart";
 import 'package:dartssh2/dartssh2.dart';
 
-void ssh_setup(SendPort sendport){
+Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
+    String username, BuildContext buildContext, var password) async {
+  try {
+    var client = SSHClient(
+      await SSHSocket.connect(hostname, port),
+      username: username,
+      onPasswordRequest: () async {
+        //this is what will happen if pass word is not null
+        return password;
+      }
+      //TODO need to setup, a password verification box
+      //TODO need to setup on change of host key
+      //this must have a function which returns the password
+      //TODO workout how to make it come up with a error if it does not propperly connect
+      ,
+    );
+    print("returns pass");
+  } catch (e) {
+    popupDialoge(buildContext, "$e", "ssh error");
+  }
+
+  //this must be called within the ssh setup function
+}
+
+Future<SSHClient?> ssh_setup(String hostname, int port, String username,
+    BuildContext buildContext, var password) async {
+  //TODO make setup not a isolate
+  //TODO there is a timeout duration it should be set in setting read from database
+  try {
+    if (password == "") {
+      password = await popupDialogeGetText(
+          buildContext, "please enter the remote host password", "SSH").then((passwordStr) async{
+            
+       var client = await ssh_setup_initlize(
+          hostname, port, username, buildContext, passwordStr).then((sshClient) async{
+
+      var uptime = await sshClient?.run('uptime');
+      print(utf8.decode(uptime!));
+      return sshClient;
+          });
+      return client;
+          }
+          
+          );
+          
+    }
+    else {
+      var client = await ssh_setup_initlize(
+          hostname, port, username, buildContext, password).then((sshClient) async{
+      var uptime = await sshClient?.run('uptime');
+      print(utf8.decode(uptime!));
+      return sshClient;
+
+          });
+    return client;
+
+
+    }
+  }
+  catch (e) {
+    popupDialoge(buildContext, "$e", "ssh error");
+  }
+}
+
+void gfdsfdsfds(SendPort sendport) {
   String password;
   ReceivePort ssh_receive_port = ReceivePort();
 
   sendport.send(ssh_receive_port.sendPort);
 
   ssh_receive_port.listen((message) async {
-    if(message[0] == "setup"){
+    if (message[0] == "setup") {
       // setup needs hostname, port and username
       //might need to have error call back
       //not sure how to handle get password
       // maybe start the ssh then isolate to handle everything
-      //TODO make setup not a isolate
       //TODO make isolate handle the ssh connection only communicating with main thread when needed for ui updates
-      try{
-      var client = SSHClient(
-        await SSHSocket.connect(message[1],message[2] ),
-        username: message[3],
-        onPasswordRequest: () => message[4]
-        );
+      try {
+        var client = SSHClient(await SSHSocket.connect(message[1], message[2]),
+            username: message[3], onPasswordRequest: () => message[4]);
 
-      sendport.send(["setup",client]);
-
-      }
-      catch(e){
+        sendport.send(["setup", client]);
+      } catch (e) {
         String error = "$e";
         print(error);
-        sendport.send(["error",error]);
+        sendport.send(["error", error]);
       }
     }
   });
-
-
 }
