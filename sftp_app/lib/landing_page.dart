@@ -1,9 +1,11 @@
+import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import "dart:isolate";
+import "error_popup.dart";
 
 class LandingPage extends StatefulWidget {
   LandingPage({Key? key}) : super(key: key);
@@ -15,10 +17,13 @@ class LandingPage extends StatefulWidget {
 class LandingPageState extends State<LandingPage> {
 
   String hostname = "";
+  String username = "";
+  String password = "";
   int port = 22;
   String status_message = "";
   CustomInputField hostnameInput = CustomInputField(labelText: "hostname",showPassword:true ,icon: Icon(Icons.wifi_tethering_sharp),controller_: TextEditingController(),);
   CustomInputField portInput =CustomInputField(labelText: "port",showPassword:true ,icon: Icon(Icons.tag),controller_: TextEditingController());
+
   late Pointer ssh_sesh ;
 Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
 
@@ -43,7 +48,6 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
           ),
           SizedBox(height: 10.0,),
           ElevatedButton(onPressed: ()async {
-
             // verify if host name and port are vaild
             setState(() {
               
@@ -53,45 +57,32 @@ Pointer<Utf8> error_message = calloc.allocate<Utf8>(250);
             ReceivePort mainReceivePort = ReceivePort();
             late Isolate ssh_initilize;
             late SendPort sshSendPort;
-            await Isolate.spawn(isolate_ssh_initilize,mainReceivePort.sendPort).then((value){
+            late SSHClient sshclient;
+            await Isolate.spawn(ssh_setup,mainReceivePort.sendPort).then((value){
               ssh_initilize = value;
             });
             
               
             mainReceivePort.listen((message) {
-              print(message);
-              if (message is SendPort){
+              if(message is SendPort){
+                print(1);
                 sshSendPort = message;
-            sshSendPort.send(["set_connection_info",hostname,port]);
+                print(2);
+                sshSendPort.send(["setup",hostname,port,username,password]);
+                print(3);
               }
-              
-              else if( message[0] == "error"){
-                if(message[1]=="connect successful"){
-                  sshSendPort.send(["verify_host"]);
-                }
-                else if (message[1] == "exit"){
-                  //try to kill process before crash
-                  Navigator.pop(context);
-                  ssh_initilize.kill(priority: Isolate.immediate);
-                  // super.dispose();
-                }
-                else if (message[1] == "ssh fatal"){
-                  //try to kill process before crash
-                  setState(() {
-                    status_message = message[1];
-                  });
-                  Navigator.pop(context);
-                  // ssh_initilize.kill(priority: Isolate.immediate);
-                }
-                else{
-                print(message[1]);
+              else if(message[0] == "setup"){
+                sshclient = message[1];
+              }
+              else if(message[0] == "error"){
+                print("error");
                 setState(() {
-                status_message = message[1];
+                popupDialoge(context,message[1],"SSH error" );
                   
                 });
-                }
               }
-            });
+
+              });
 
 
 
