@@ -1,12 +1,6 @@
 import 'dart:convert';
-import 'dart:ffi';
-import 'dart:html';
-import 'dart:io';
 import 'dart:isolate';
-import 'dart:js';
-import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
-import "ssh.dart";
 import "error_popup.dart";
 import 'package:dartssh2/dartssh2.dart';
 
