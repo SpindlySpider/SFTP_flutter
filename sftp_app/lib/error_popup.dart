@@ -4,7 +4,7 @@ import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 
 Future<void> popupDialoge(
-    BuildContext context, String errorMsg, String title) async {
+    BuildContext context, String errorMsg, String title) async{
   return showDialog<void>(
       context: context,
       builder: (BuildContext context) {

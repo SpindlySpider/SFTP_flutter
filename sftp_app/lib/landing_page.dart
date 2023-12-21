@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import "error_popup.dart";
+
 
 class LandingPage extends StatefulWidget {
   LandingPage({Key? key}) : super(key: key);
@@ -99,12 +102,14 @@ class LandingPageState extends State<LandingPage> {
                 password = passwordInput.getText();
                 if (!(hostname == "" && username == "")) {
                   port = int.parse(portInput.getText());
-                  setState(() {
+                  setState((){
                     try {
-                      ssh_setup(hostname, port, username, context, password)
-                          .then((value) {
-                        // should pass the ssh session to the isolate
-                      });
+                      var sshClient = ssh_setup(hostname, port, username, context, password);
+                        
+            
+
+                        
+                        // should pass the ssh session to the isol);
                     } catch (e) {
                       popupDialoge(context, "$e", "ssh error");
                     }
