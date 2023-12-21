@@ -19,7 +19,7 @@ Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
       //TODO workout how to make it come up with a error if it does not propperly connect
       ,
     );
-    print("returns pass");
+    return client;
   } catch (e) {
     popupDialoge(buildContext, "$e", "ssh error");
   }
@@ -34,29 +34,25 @@ Future<SSHClient?> ssh_setup(String hostname, int port, String username,
   try {
     if (password == "") {
       password = await popupDialogeGetText(
-              buildContext, "please enter the remote host password", "SSH")
-          .then((passwordStr) async {
-        var client = await ssh_setup_initlize(
-                hostname, port, username, buildContext, passwordStr)
-            .then((sshClient) async {
-          var uptime = await sshClient?.run('uptime');
-          print(utf8.decode(uptime!));
-          return sshClient;
-        });
-        return client;
-      });
-    } else {
+          buildContext, "please enter the remote host password", "SSH");
       var client = await ssh_setup_initlize(
               hostname, port, username, buildContext, password)
           .then((sshClient) async {
         var uptime = await sshClient?.run('uptime');
-        print(utf8.decode(uptime!));
-        return sshClient;
+        print(utf8.decode(uptime as List<int>));
       });
+      return client;
+    } else {
+      var client = await ssh_setup_initlize(
+          hostname, port, username, buildContext, password).then((sshClient) async{
+                    var uptime = await sshClient?.run('uptime');
+        print(utf8.decode(uptime as List<int>));
+          });
       return client;
     }
   } catch (e) {
     popupDialoge(buildContext, "$e", "ssh error");
+    return null;
   }
 }
 
