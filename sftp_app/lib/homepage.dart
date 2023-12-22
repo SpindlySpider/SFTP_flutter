@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sftp_app/landing_page.dart';
-
+import 'package:sqflite/sqflite.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -8,8 +8,15 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  GlobalKey<LandingPageState> landingPageKeys = GlobalKey<LandingPageState>();
+  //HomePageState.ensureInitialized();
+  final database = openDatabase("server.db",
+  onCreate: (db,version){
+    return db.execute(
+      "CREATE TABLE session(session_id INTEGER PRIMARY KEY,hostname VARCHAR(16), port INTEGER, username VARCHAR(50), password VARCHAR(200),user_salt VARCHAR(100), cwd_server VARCHAR(1607),cwd_client VARCHAR(1607) )"
+    );
+  });
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -22,13 +29,11 @@ class HomePageState extends State<HomePage> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  landingPageKeys.currentState?.dispose();
-                  landingPageKeys = GlobalKey<LandingPageState>();
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              LandingPage(key: landingPageKeys)));
+                              LandingPage()));
                 });
               },
               child: Text("ssh"))

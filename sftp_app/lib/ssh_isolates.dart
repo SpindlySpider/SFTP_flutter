@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import "error_popup.dart";
 import 'package:dartssh2/dartssh2.dart';
+import 'package:sqflite/sqflite.dart';
+//TODO SQL database
+
+
 
 Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
     String username, BuildContext buildContext, var password) async {
@@ -15,7 +19,6 @@ Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
       }
       //TODO need to setup, a password verification box
       //TODO need to setup on change of host key
-      //this must have a function which returns the password
       //TODO workout how to make it come up with a error if it does not propperly connect
       ,
     );
