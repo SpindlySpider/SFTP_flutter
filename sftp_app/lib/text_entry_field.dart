@@ -6,13 +6,15 @@ class CustomInputField extends StatefulWidget {
   bool showPassword;
   TextEditingController controller_;
   bool showEye;
+  String? defaultText;
 
   CustomInputField(
       {required this.labelText,
       this.icon,
       required this.showPassword,
       required this.controller_,
-      required this.showEye});
+      required this.showEye,
+      this.defaultText});
 
   @override
   _CustomInputFieldState createState() => _CustomInputFieldState();
@@ -25,6 +27,11 @@ class CustomInputField extends StatefulWidget {
 class _CustomInputFieldState extends State<CustomInputField> {
   @override
   Widget build(BuildContext context) {
+    if(widget.defaultText == String){
+
+    widget.controller_.text = widget.defaultText!;
+    }
+
     return TextField(
       obscureText: !widget.showPassword,
       decoration: InputDecoration(
