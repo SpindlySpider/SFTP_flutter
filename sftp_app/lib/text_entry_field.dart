@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class CustomInputField extends StatefulWidget {
@@ -6,18 +8,23 @@ class CustomInputField extends StatefulWidget {
   bool showPassword;
   TextEditingController controller_;
   bool showEye;
-  String? defaultText;
 
-  CustomInputField(
-      {required this.labelText,
-      this.icon,
-      required this.showPassword,
-      required this.controller_,
-      required this.showEye,
-      this.defaultText});
+  CustomInputField({
+    required this.labelText,
+    this.icon,
+    required this.showPassword,
+    required this.controller_,
+    required this.showEye,
+
+  });
 
   @override
   _CustomInputFieldState createState() => _CustomInputFieldState();
+
+  void setDefaultText(String inputText) {
+    controller_.value = TextEditingValue(text: inputText);
+
+  }
 
   String getText() {
     return controller_.text;
@@ -27,11 +34,6 @@ class CustomInputField extends StatefulWidget {
 class _CustomInputFieldState extends State<CustomInputField> {
   @override
   Widget build(BuildContext context) {
-    if(widget.defaultText == String){
-
-    widget.controller_.text = widget.defaultText!;
-    }
-
     return TextField(
       obscureText: !widget.showPassword,
       decoration: InputDecoration(
@@ -53,6 +55,8 @@ class _CustomInputFieldState extends State<CustomInputField> {
           widget.controller_.text = intext;
         });
       },
+      controller: widget.controller_,
+    
     );
   }
 }

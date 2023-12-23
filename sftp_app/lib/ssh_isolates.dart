@@ -29,7 +29,7 @@ Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
 }
 
 Future<SSHClient?> ssh_setup(String hostname, int port, String username,
-    BuildContext buildContext, var password) async {
+    BuildContext buildContext, String? password) async {
   //TODO make setup not a isolate
   //TODO there is a timeout duration it should be set in setting read from database
   try {

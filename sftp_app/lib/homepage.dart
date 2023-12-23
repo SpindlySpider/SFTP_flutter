@@ -1,7 +1,10 @@
+
 import 'package:flutter/material.dart';
+import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sftp_app/ssh_isolates.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -30,10 +33,28 @@ class HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               return ListTile(
                   leading: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      try {
+                        var sshClient = ssh_setup(
+                            db.getAt(index)[0],
+                            db.getAt(index)[1],
+                            db.getAt(index)[2],
+                            context,
+                            db.getAt(index)[3]);
+                        
+                      } catch (e) {
+                        popupDialoge(context, "$e", "ssh error");
+
+
+                      }
+
+
+                      
+                    },
                     child: Text("connect"),
                   ),
-                  title: Text(db.getAt(index)[0]),
+                  title: Text(
+                      "${db.getAt(index)[0]} :${db.getAt(index)[1]} @${db.getAt(index)[2]} "),
                   trailing: PopupMenuButton<ListTileTitleAlignment>(
                     itemBuilder: (context) {
                       void removeEntry(index) {
@@ -44,18 +65,16 @@ class HomePageState extends State<HomePage> {
                         PopupMenuItem(
                           child: Text("edit"),
                           onTap: () {
-                            Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LandingPage(
-                                          hostname:db.getAt(index)[0],
-                                          port: db.getAt(index)[1],
-                                          username: db.getAt(index)[2],
-                                          password: db.getAt(index)[3],
-
-
-                                        )))
-                                .then((value) {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return LandingPage(
+                                hostname: db.getAt(index)[0],
+                                port: db.getAt(index)[1],
+                                username: db.getAt(index)[2],
+                                password: db.getAt(index)[3],
+                                boxIndex: index,
+                              );
+                            })).then((value) {
                               setState(() {});
                             });
                           },
@@ -81,7 +100,12 @@ class HomePageState extends State<HomePage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LandingPage())).then((value) {
+                          builder: (context) => LandingPage(
+                                hostname: "",
+                                password: "",
+                                port: 22,
+                                username: "",
+                              ))).then((value) {
                     setState(() {});
                   });
                 });
