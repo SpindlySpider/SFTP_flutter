@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import "landing_page.dart";
 import 'homepage.dart';
-import 'package:sqflite/sqflite.dart';
-void main() {
+void main() async{
+    await Hive.initFlutter();
+    var box = await Hive.openBox('session');
   runApp(const MyApp());
 }
 
@@ -14,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }

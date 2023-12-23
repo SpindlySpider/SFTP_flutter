@@ -1,3 +1,4 @@
+
 class Session {
   final int session_id;
   final String hostname;
@@ -18,4 +19,24 @@ class Session {
     required this.cwd_server,
     required this.cwd_client,
   });
+  Map<String, dynamic> toMap() {
+    return {
+      'session_id': session_id,
+      'hostname': hostname,
+      'port': port,
+      'username': username,
+      'password': password,
+      'user_salt': user_salt,
+      'cwd_server': cwd_server,
+      'cwd_client': cwd_client,
+    };
+  }
+
+  // Implement toString to make it easier to see information about
+  // each dog when using the print statement.
+  @override
+  String toString() {
+    return 'session{session_id: $session_id, hostname: $hostname, port: $port,username: $username, password: $password, user_salt: $user_salt, cwd_server: $cwd_server, cwd_client $cwd_server}';
+  }
+
 }

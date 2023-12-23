@@ -1,15 +1,21 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import "error_popup.dart";
-
+import "";
 
 class LandingPage extends StatefulWidget {
-  LandingPage({Key? key}) : super(key: key);
+  LandingPage(
+      {super.key, this.hostname, this.username, this.password, this.port});
+  String? hostname;
+  String? username;
+  String? password;
+  int? port;
   @override
   State<LandingPage> createState() => LandingPageState();
 }
@@ -55,7 +61,7 @@ class LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 93, 33, 132),
+        backgroundColor: Color.fromARGB(255, 21, 20, 22),
         title: Text("sftp app"),
         centerTitle: true,
       ),
@@ -95,28 +101,47 @@ class LandingPageState extends State<LandingPage> {
             height: 10.0,
           ),
           ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 // verify if host name and port are vaild
-                hostname = hostnameInput.getText();
-                username = usernameInput.getText();
-                password = passwordInput.getText();
-                if (!(hostname == "" && username == "")) {
+                if (widget.hostname == null) {
+                  hostname = hostnameInput.getText();
+                } else {
+                  hostname = widget.hostname!;
+                }
+                if (widget.username == null) {
+                  username = usernameInput.getText();
+                } else {
+                  username = widget.username!;
+                }
+                if (widget.password == null) {
+                  username = passwordInput.getText();
+                } else {
+                  password = widget.password!;
+                }
+                if (widget.port == null) {
                   port = int.parse(portInput.getText());
-                  setState((){
-                    try {
-                      var sshClient = ssh_setup(hostname, port, username, context, password);
-                        
-            
+                } else {
+                  port = widget.port!;
+                }
 
-                        
-                        // should pass the ssh session to the isol);
+                if (!(hostname == "" && username == "")) {
+                  setState(() {
+                    try {
+                      //using hostname as key
+                      var box = Hive.box('session');
+                      box.add([hostname,port, username, password]);
+                      Navigator.pop(context);
+                      // var sshClient = ssh_setup(
+                      //     hostname, port, username, context, password);
+
+                      // should pass the ssh session to the isol);
                     } catch (e) {
                       popupDialoge(context, "$e", "ssh error");
                     }
                   });
                 }
               },
-              child: Text("connect")),
+              child: Text("save")),
         ],
       ),
     );

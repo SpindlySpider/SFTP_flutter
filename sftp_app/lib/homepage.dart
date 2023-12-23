@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:sftp_app/landing_page.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
   @override
   State<HomePage> createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  //HomePageState.ensureInitialized();
-  final database = openDatabase("server.db",
-  onCreate: (db,version){
-    return db.execute(
-      "CREATE TABLE session(session_id INTEGER PRIMARY KEY,hostname VARCHAR(16), port INTEGER, username VARCHAR(50), password VARCHAR(200),user_salt VARCHAR(100), cwd_server VARCHAR(1607),cwd_client VARCHAR(1607) )"
-    );
-  });
+
   @override
+  var db;
 
   Widget build(BuildContext context) {
+    db = Hive.box("session");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 93, 33, 132),
@@ -26,6 +23,31 @@ class HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
+          Expanded(child: 
+          
+          ListView(
+            
+            children:<Widget> [
+              if(db.isNotEmpty)
+                for(List entry in db.values )
+                ListTile(
+                  title: Center(child: Text(entry[0])),
+                  trailing: Icon(Icons.more_vert),
+                ),
+
+              
+              
+    Container(
+      height: 50,
+      color: Colors.amber[600],
+      child: const Center(child: Text('Entry A'))),
+
+              
+            ],
+          )
+          
+          ),
+          
           ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -33,10 +55,14 @@ class HomePageState extends State<HomePage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              LandingPage()));
+                              LandingPage())).then((value){
+                                setState(() {
+                                  
+                                });
+                              });
                 });
               },
-              child: Text("ssh"))
+              child: Text("add ssh"))
         ],
       ),
     );

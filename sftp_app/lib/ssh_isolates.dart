@@ -2,9 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import "error_popup.dart";
 import 'package:dartssh2/dartssh2.dart';
-import 'package:sqflite/sqflite.dart';
 //TODO SQL database
-
 
 
 Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
