@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 class HomePage extends StatefulWidget {
   HomePage({super.key});
   @override
@@ -9,7 +10,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-
   @override
   var db;
 
@@ -23,43 +23,60 @@ class HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          Expanded(child: 
-          
-          ListView(
-            
-            children:<Widget> [
-              if(db.isNotEmpty)
-                for(List entry in db.values )
-                ListTile(
-                  title: Center(child: Text(entry[0])),
-                  trailing: Icon(Icons.more_vert),
+          Expanded(
+              child: ListView.separated(
+            padding: const EdgeInsets.all(8),
+            itemCount: db.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: ElevatedButton(
+                  onPressed: () {
+                    
+                  },
+                  child: Text("connect"),
                 ),
+                  title: Text(db.getAt(index)[0]),
+                  trailing:
+                  PopupMenuButton<ListTileTitleAlignment>(
+                    itemBuilder: (context) {
+                      void removeEntry(index){
+                        db.deleteAt(index);
+                      }
 
-              
-              
-    Container(
-      height: 50,
-      color: Colors.amber[600],
-      child: const Center(child: Text('Entry A'))),
+                      return <PopupMenuEntry<ListTileTitleAlignment>>[
+                        PopupMenuItem(
+                          child: Text("edit"),
 
-              
-            ],
-          )
-          
-          ),
-          
+                          ),
+                        PopupMenuItem(
+                          child: Text("delete"),
+                          onTap: () {
+                            setState(() {
+                              print("delete");
+                            removeEntry(index);
+                              
+                            });
+                          },
+                          ),
+
+
+                      ];
+                    },
+                  )
+                  );
+            },
+            separatorBuilder: (context, index) => Divider(),
+
+          )),
           ElevatedButton(
               onPressed: () {
                 setState(() {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              LandingPage())).then((value){
-                                setState(() {
-                                  
-                                });
-                              });
+                          builder: (context) => LandingPage())).then((value) {
+                    setState(() {});
+                  });
                 });
               },
               child: Text("add ssh"))
