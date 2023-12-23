@@ -29,44 +29,51 @@ class HomePageState extends State<HomePage> {
             itemCount: db.length,
             itemBuilder: (context, index) {
               return ListTile(
-                leading: ElevatedButton(
-                  onPressed: () {
-                    
-                  },
-                  child: Text("connect"),
-                ),
+                  leading: ElevatedButton(
+                    onPressed: () {},
+                    child: Text("connect"),
+                  ),
                   title: Text(db.getAt(index)[0]),
-                  trailing:
-                  PopupMenuButton<ListTileTitleAlignment>(
+                  trailing: PopupMenuButton<ListTileTitleAlignment>(
                     itemBuilder: (context) {
-                      void removeEntry(index){
+                      void removeEntry(index) {
                         db.deleteAt(index);
                       }
 
                       return <PopupMenuEntry<ListTileTitleAlignment>>[
                         PopupMenuItem(
                           child: Text("edit"),
+                          onTap: () {
+                            Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LandingPage(
+                                          hostname:db.getAt(index)[0],
+                                          port: db.getAt(index)[1],
+                                          username: db.getAt(index)[2],
+                                          password: db.getAt(index)[3],
 
-                          ),
+
+                                        )))
+                                .then((value) {
+                              setState(() {});
+                            });
+                          },
+                        ),
                         PopupMenuItem(
                           child: Text("delete"),
                           onTap: () {
                             setState(() {
                               print("delete");
-                            removeEntry(index);
-                              
+                              removeEntry(index);
                             });
                           },
-                          ),
-
-
+                        ),
                       ];
                     },
-                  )
-                  );
+                  ));
             },
             separatorBuilder: (context, index) => Divider(),
-
           )),
           ElevatedButton(
               onPressed: () {
