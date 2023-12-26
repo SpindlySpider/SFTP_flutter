@@ -1,4 +1,6 @@
 //this should have two sides, local view and server view
+import 'dart:isolate';
+
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
 import 'package:sftp_app/error_popup.dart';
@@ -18,25 +20,28 @@ class SftpPage extends StatefulWidget {
 
 class SftpPageState extends State<SftpPage> {
   var db;
+  ReceivePort mainThreadRecivePort = ReceivePort();
+  late SendPort isolatesSendport;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     db=Hive.box("session");
-    sftpStartServer(widget.sshSesh).then((mainThreadRecivePort) {
-      //this is handling all of the display of the isolates.
-      mainThreadRecivePort.listen((message) {
-        if(message[0]=="server"){
-          if(message[1] == "listdir"){
-          }
+  Isolate.spawn(sftpSetup, mainThreadRecivePort.sendPort);
+    //this is handling all of the display of the isolates.
+    mainThreadRecivePort.listen((message) async {
+      if(message is SendPort){
+        isolatesSendport = message;
+      }
+      if(message[0]=="server"){
+        if(message[1] == "listdir"){
         }
+      }
 
 
       });
     } 
-    );
 
-  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

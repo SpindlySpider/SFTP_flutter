@@ -1,6 +1,5 @@
 import 'dart:ffi';
 import 'dart:isolate';
-
 import 'package:hive/hive.dart';
 import 'package:dartssh2/dartssh2.dart';
 
@@ -8,33 +7,40 @@ import 'package:dartssh2/dartssh2.dart';
 //one for server with send port
 //one for client machine to upload download
 
-Future<ReceivePort> sftpStartServer(SSHClient client) async {
-  ReceivePort mainThreadRecivePort = ReceivePort();
-  Isolate.spawn(sftpSetup, mainThreadRecivePort.sendPort);
-  SftpClient sftp = await client.sftp();
-  return mainThreadRecivePort;
-}
+
 
 void sftpSetup(SendPort mainThreadSendPort) {
   //should setup server operations
   //serpate threads for server and client operations
-  late SendPort clientThreadSendPort;
+  //need 3 things, server communcation, client communication , parent isolate communiation.
+  ReceivePort thisRevicePort = ReceivePort();
+
+  SendPort clientThreadSendPort;
   SendPort serverThreadSendPort;
   ReceivePort serverReceivePort = ReceivePort();
   ReceivePort clientReceivePort = ReceivePort();
-  Isolate.spawn(mainThreadlistenClient, clientReceivePort.sendPort);
+  mainThreadSendPort.send(thisRevicePort);
+  thisRevicePort.listen((message) {
+    //invoke commands here such as download client get cwd all that
+
+  });
+
   Isolate.spawn(mainThreadlistenServer, serverReceivePort.sendPort);
   clientReceivePort.listen((message) async {
     if (message is SendPort) {
       clientThreadSendPort = message;
-      +.send(message)
     }
   });
-  serverReceivePort.listen((message) {
+
+
+  Isolate.spawn(mainThreadlistenClient, clientReceivePort.sendPort);
+  serverReceivePort.listen((message)async {
     if (message is SendPort) {
       serverThreadSendPort = message;
     }
   });
+
+  
 }
 
 void mainThreadlistenClient(SendPort mainThreadSendPort) {
