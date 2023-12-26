@@ -5,18 +5,38 @@ import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 
 class SftpPage extends StatefulWidget {
-  SftpPage({super.key});
-  // SftpPage({super.key,required this.sshSesh});
-  // SSHClient  sshSesh;
+  // SftpPage({super.key,});
+  SftpPage({super.key,required this.sshSesh});
+  SSHClient  sshSesh;
   @override
   State<SftpPage> createState() => SftpPageState();
 }
 
 class SftpPageState extends State<SftpPage> {
+  var db;
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    db=Hive.box("session");
+    sftpStartServer(widget.sshSesh).then((mainThreadRecivePort) {
+      //this is handling all of the display of the isolates.
+      mainThreadRecivePort.listen((message) {
+        if(message[0]=="server"){
+          if(message[1] == "listdir"){
+          }
+        }
+
+
+      });
+    } 
+    );
+
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
