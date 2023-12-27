@@ -26,18 +26,21 @@ class SftpPageState extends State<SftpPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db=Hive.box("session");
-  Isolate.spawn(sftpSetup, mainThreadRecivePort.sendPort);
+    
+  Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
     //this is handling all of the display of the isolates.
     mainThreadRecivePort.listen((message) async {
       if(message is SendPort){
         isolatesSendport = message;
+        isolatesSendport.send(["setup"]);
+        //inital call for all dir entires
       }
-      if(message[0]=="server"){
-        if(message[1] == "listdir"){
-        }
-      }
+      if(message[0] == "listdir"){
+        print(message);
+        // message[1][0] is current working dir
+        // onwards from index 0 is entries 
 
+      }
 
       });
     } 
@@ -61,7 +64,9 @@ class SftpPageState extends State<SftpPage> {
                 child: ListView.separated(
                   itemCount: 1,
                   itemBuilder: (context, index) {
-                    
+                    return ListTile(
+                      
+                    );
                   },
                   separatorBuilder: (context, index) =>const Divider(),
 
