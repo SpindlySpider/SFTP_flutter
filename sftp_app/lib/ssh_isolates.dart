@@ -22,7 +22,8 @@ Future<SSHClient?> ssh_setup_initlize(String hostname, int port,
     );
     return client;
   } catch (e) {
-    popupDialoge(buildContext, "$e", "ssh error");
+    return ["error","$e"];
+    // popupDialoge(buildContext, "$e", "ssh error");
   }
 
   //this must be called within the ssh setup function
