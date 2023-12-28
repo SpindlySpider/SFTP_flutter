@@ -24,19 +24,13 @@ void sftpSetup(List obj) async {
   SendPort mainThreadSendPort = obj[0];
   // SSHClient sshClient = obj[1];
   SSHClient sshClient = client;
-
-  ReceivePort serverReceivePort = ReceivePort();
-  ReceivePort clientReceivePort = ReceivePort();
-
-
-
     thisRevicePort.listen((message) async {
       if (message[0] == "setup") {
         // ["setup",dirpath,]
         //get list of current working directory
         //TODO change temp to obj[1]
         print("sent listdir command to server thread");
-        serverThreadSendPort!.send(["listdir", sshClient, message[1]]);
+
         // clientThreadSendPort
       }
       if (message[0] == "listdir") {
