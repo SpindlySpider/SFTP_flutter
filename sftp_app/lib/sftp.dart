@@ -25,24 +25,11 @@ void sftpSetup(List obj) async {
   // SSHClient sshClient = obj[1];
   SSHClient sshClient = client;
 
-  SendPort? clientThreadSendPort;
-  SendPort? serverThreadSendPort;
   ReceivePort serverReceivePort = ReceivePort();
   ReceivePort clientReceivePort = ReceivePort();
 
-  Isolate.spawn(mainThreadlistenClient, clientReceivePort.sendPort);
-  clientReceivePort.listen((message) async {
-    if (message is SendPort) {
-      clientThreadSendPort = message;
-    }
-  });
 
-  Isolate.spawn(mainThreadlistenServer, serverReceivePort.sendPort)
-      .then((value) {
-    mainThreadSendPort.send(thisRevicePort.sendPort);
-    if (serverThreadSendPort == null) {
-      print(true);
-    }
+
     thisRevicePort.listen((message) async {
       if (message[0] == "setup") {
         // ["setup",dirpath,]
@@ -57,51 +44,7 @@ void sftpSetup(List obj) async {
       }
       //invoke commands here such as download client get cwd all that
     });
-  });
-  serverReceivePort.listen((message) async {
-    if (message is SendPort) {
-      serverThreadSendPort =
-          message; // causing issue because its not assigned on run time
-    } else if (message[0] == "listdir") {
-      String path = message[1];
-      List items = message[2];
-      mainThreadSendPort.send(["listdir", path, items]);
-      //passes up the dir to the main thread
-    }
-  });
 }
 
-void mainThreadlistenClient(SendPort mainThreadSendPort) {
-  ReceivePort clientReceivePort = ReceivePort();
-  mainThreadSendPort.send(clientReceivePort.sendPort);
-  clientReceivePort.listen((message) async {
-    if (message[0] == "") {}
-  });
-//for local file operations
-//must have upload and tell sftp function to upload it
-}
 
-void mainThreadlistenServer(SendPort mainThreadSendPort) {
-  ReceivePort serverReceivePort = ReceivePort();
-  mainThreadSendPort.send(serverReceivePort.sendPort);
-  serverReceivePort.listen((message) async {
-    print("recived message from somewhere");
-    if (message[0] == "listdir") {
-      print("listdiur from server thread");
-      if (message[2] is String) {
-        SSHClient sshClient = message[1];
-        String dirpath = message[2];
-        // should use database for the current cwd of string
-        //[sshclient,dirpath]
-        var sftp = await sshClient.sftp();
-        var items = await sftp.listdir(dirpath);
-        sftp.close(); //might cause issues
-        mainThreadSendPort.send(["listdir", dirpath, items]);
-      }
-    }
-  });
-//
-//server file operations
-//must have download
-//must tell sftp to download a file
-}
+
