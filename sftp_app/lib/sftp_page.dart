@@ -11,11 +11,11 @@ import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 
 class SftpPage extends StatefulWidget {
-  SftpPage({
-    super.key,
-  });
-  // SftpPage({super.key,required this.sshSesh});
-  // SSHClient  sshSesh;
+  // SftpPage({
+  //   super.key,
+  // });
+  SftpPage({super.key,required this.sshSesh});
+  SSHClient  sshSesh;
   @override
   State<SftpPage> createState() => SftpPageState();
 }
@@ -29,9 +29,9 @@ class SftpPageState extends State<SftpPage> {
     // TODO: implement initState
     super.initState();
 
-    Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort]);
+    // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort]);
 
-    // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
+    Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
     //this is handling all of the display of the isolates.
     mainThreadRecivePort.listen((message) async {
       if (message is SendPort) {
