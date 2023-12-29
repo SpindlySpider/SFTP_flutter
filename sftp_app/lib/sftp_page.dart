@@ -10,6 +10,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'package:stream_channel/isolate_channel.dart';
+import 'package:path/path.dart';
+
 
 class SftpPage extends StatefulWidget {
   SftpPage({
@@ -17,22 +19,28 @@ class SftpPage extends StatefulWidget {
   });
   // SftpPage({super.key,required this.sshSesh});
   // needs to have isolate channel to send messages. make isolate channel
+  // pass in path
   @override
   State<SftpPage> createState() => SftpPageState();
 }
 
-class SftpPageState extends State<SftpPage> {
+class SftpPageState extends State<SftpPage> { 
+  String serverPath = "/";
+
   ReceivePort mainThreadRecivePort = ReceivePort();
   ReceivePort sftpReciveport = ReceivePort();
-  // late List fileList =[];
+  late List fileList =[];
+  late int numOfFiles=0;
+  late int numOfFolders=0;
+  var isolateChannel;
+  var sftpChannel;
   @override
   void initState() {
-
-
-    IsolateChannel isolateChannel =
-        IsolateChannel.connectReceive(mainThreadRecivePort);
-    IsolateChannel sftpChannel = IsolateChannel.connectReceive(sftpReciveport);
-    ssh_main_handle("34.140.186.12", 22, "up2107487", context, "RjHRL4v8",
+super.initState();
+    isolateChannel =IsolateChannel.connectReceive(mainThreadRecivePort);
+    sftpChannel= IsolateChannel.connectReceive(sftpReciveport);
+  
+    ssh_main_handle("34.140.186.12", 22, "up2107487", this.context, "RjHRL4v8",
         mainThreadRecivePort, isolateChannel, sftpReciveport, sftpChannel);
 
     sftpChannel.sink.add(["sftp", "listdir", "/"]);
@@ -43,22 +51,34 @@ class SftpPageState extends State<SftpPage> {
         if (message[1] == "listdir") {
           //should be the directory
           print(message[2]);
-          // fileList = message[2];
-          // numOfFiles = 0;
-          // message[2][0].forEach((element) {
-          //   numOfFiles++;
-          //   numOfFolders++;
-          //   //use this to see how many folders there are
-          //  });
-          // message[2][1].forEach((element) {
-          //   numOfFiles++;
-          //  });
-          //  print(numOfFiles);
+          fileList = message[2];
+          numOfFiles = 0;
+          fileList[0].remove(".");
+          fileList[0].remove("..");
+          fileList[0].insert(0, "..");
+          message[2][0].forEach((element) {
+            if(element == ""){}
+            numOfFiles++;
+            numOfFolders++;
+            //use this to see how many folders there are
+           });
+          message[2][1].forEach((element) {
+            numOfFiles++;
+           });
+           setState(() {
+             
+           });
+           print(numOfFiles);
            
         }
       }
-super.initState();
-    });
+      else if(message[0] =="error"){
+        popupDialoge(this.context, message[1], "sftp error");
+        serverPath = dirname(serverPath);
+      }
+    }
+    );
+
 
     // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
     //this is handling all of the display of the isolates.
@@ -69,6 +89,7 @@ super.initState();
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 93, 33, 132),
           title: Text("sftp app"),
+          leading: Text("$serverPath"),
           centerTitle: true,
         ),
         body: LayoutBuilder(
@@ -82,12 +103,39 @@ super.initState();
                   alignment: Alignment.topCenter,
                   child: ListView.separated(
                     // scrollDirection: Axis.vertical,
-                    itemCount: 5,
+                    itemCount: numOfFiles,
                     itemBuilder: (context, index) {
-                      
+                      numOfFolders = fileList[0].length;
+                      int fileIndex;
+                      String leadchar="";
+                      if(numOfFolders>index){
+                        leadchar = "#";
+                        fileIndex=0;
+
+                      }
+                      else{
+                        fileIndex =1;
+                        index= index-numOfFolders;
+                      }
                       return ListTile(
-                        // title: Text("${fileList[fileIndex][index]}"),
-                        title: Text("5"),
+                        title: Text("$leadchar${fileList[fileIndex][index]}"),
+                        onTap: (){
+                          var localPath = serverPath;
+                          print(serverPath);
+                          if(fileIndex==0){
+                            if(fileList[fileIndex][index]==".."){
+                              localPath =dirname(serverPath);
+                            }
+                            else{
+                            localPath = join(serverPath,fileList[fileIndex][index]);
+                            localPath = "$serverPath/${fileList[fileIndex][index]}";
+                            }
+                            serverPath = localPath;
+                            print(localPath);
+                            sftpChannel.sink.add(["sftp", "listdir", localPath]);
+                          }
+                        },
+                        // title: Text("5"),
 
                       );
 

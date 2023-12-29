@@ -10,6 +10,8 @@ import 'package:dartssh2/dartssh2.dart';
 //handles should be called on main thread and handle success/error messages
 //isoltes functions should only be called in a ssh isolate
 void ssh_main(List args) async {
+  try{
+
   SendPort sendPort = args[0];
   String hostname = args[1];
   int port = args[2];
@@ -32,12 +34,20 @@ void ssh_main(List args) async {
   if (result![0] == "success") {
     //need to sort this to handle sftp operations, need to asign ssh client
     print("sucessful");
-    sftpSetup(result[1], sftpChannel);
+    var sftp = await result[1].sftp();
+    sftpSetup(result[1], sftpChannel,sftp);
 
   } else {
     // handle error stuff.
     print("error");
   }
+  }
+  catch(e){
+    print(e);
+  }
+
+
+
 }
 
 Future<List> ssh_setup_initlize(
