@@ -9,43 +9,59 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
+import 'package:stream_channel/isolate_channel.dart';
 
 class SftpPage extends StatefulWidget {
-  // SftpPage({
-  //   super.key,
-  // });
-  SftpPage({super.key,required this.sshSesh});
-  SSHClient  sshSesh;
+  SftpPage({
+    super.key,
+  });
+  // SftpPage({super.key,required this.sshSesh});
+  // needs to have isolate channel to send messages. make isolate channel
   @override
   State<SftpPage> createState() => SftpPageState();
 }
 
 class SftpPageState extends State<SftpPage> {
-  var db;
   ReceivePort mainThreadRecivePort = ReceivePort();
-  late SendPort isolatesSendport;
+  ReceivePort sftpReciveport = ReceivePort();
+  // late List fileList =[];
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
 
-    // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort]);
 
-    Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
-    //this is handling all of the display of the isolates.
-    mainThreadRecivePort.listen((message) async {
-      if (message is SendPort) {
-        isolatesSendport = message;
-        print("setup");
-        isolatesSendport.send(["setup"]);
-        //inital call for all dir entires
+    IsolateChannel isolateChannel =
+        IsolateChannel.connectReceive(mainThreadRecivePort);
+    IsolateChannel sftpChannel = IsolateChannel.connectReceive(sftpReciveport);
+    ssh_main_handle("34.140.186.12", 22, "up2107487", context, "RjHRL4v8",
+        mainThreadRecivePort, isolateChannel, sftpReciveport, sftpChannel);
+
+    sftpChannel.sink.add(["sftp", "listdir", "/"]);
+
+    sftpChannel.stream.listen((message) async {
+
+      if (message[0] == "sftp") {
+        if (message[1] == "listdir") {
+          //should be the directory
+          print(message[2]);
+          // fileList = message[2];
+          // numOfFiles = 0;
+          // message[2][0].forEach((element) {
+          //   numOfFiles++;
+          //   numOfFolders++;
+          //   //use this to see how many folders there are
+          //  });
+          // message[2][1].forEach((element) {
+          //   numOfFiles++;
+          //  });
+          //  print(numOfFiles);
+           
+        }
       }
-      if (message[0] == "listdir") {
-        print(message);
-        // message[1][0] is current working dir
-        // onwards from index 0 is entries
-      }
+super.initState();
     });
+
+    // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
+    //this is handling all of the display of the isolates.
   }
 
   Widget build(BuildContext context) {
@@ -65,9 +81,16 @@ class SftpPageState extends State<SftpPage> {
                   color: Colors.amber,
                   alignment: Alignment.topCenter,
                   child: ListView.separated(
-                    itemCount: 1,
+                    // scrollDirection: Axis.vertical,
+                    itemCount: 5,
                     itemBuilder: (context, index) {
-                      return ListTile();
+                      
+                      return ListTile(
+                        // title: Text("${fileList[fileIndex][index]}"),
+                        title: Text("5"),
+
+                      );
+
                     },
                     separatorBuilder: (context, index) => const Divider(),
                   ),

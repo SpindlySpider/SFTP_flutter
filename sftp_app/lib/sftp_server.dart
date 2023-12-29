@@ -6,7 +6,6 @@ import 'package:hive/hive.dart';
 import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 
-void main
 
 void listdir(SendPort sendport) async {
   ReceivePort receivePort = ReceivePort();

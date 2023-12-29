@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
@@ -14,10 +13,9 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   @override
-  var db;
+  var db= Hive.box("session");
 
   Widget build(BuildContext context) {
-    db = Hive.box("session");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 93, 33, 132),
@@ -35,21 +33,16 @@ class HomePageState extends State<HomePage> {
                   leading: ElevatedButton(
                     onPressed: () {
                       try {
-                        var sshClient = ssh_setup(
-                            db.getAt(index)[0],
-                            db.getAt(index)[1],
-                            db.getAt(index)[2],
-                            context,
-                            db.getAt(index)[3]);
-                        
+                        //TODO undo this comment haha
+                      // ssh_main_handle(
+                      //       db.getAt(index)[0],
+                      //       db.getAt(index)[1],
+                      //       db.getAt(index)[2],
+                      //       context,
+                      //       db.getAt(index)[3]);
                       } catch (e) {
                         popupDialoge(context, "$e", "ssh error");
-
-
                       }
-
-
-                      
                     },
                     child: Text("connect"),
                   ),
