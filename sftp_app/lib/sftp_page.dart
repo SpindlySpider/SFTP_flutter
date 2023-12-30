@@ -54,6 +54,7 @@ class SftpPageState extends State<SftpPage> {
           fileList[0].remove(".");
           fileList[0].remove("..");
           fileList[0].insert(0, "..");
+
           message[2][0].forEach((element) {
             if (element == "") {}
             numOfFiles++;
@@ -132,7 +133,12 @@ class SftpPageState extends State<SftpPage> {
                     },
                     separatorBuilder: (context, index) => const Divider(),
                   ),
-                )),
+                )
+                ),
+                Divider(
+                  color: Colors.black,
+                  height: 5,
+                ),
                 Expanded(
                     child: Container(
                   height: constraints.maxHeight / 2,
