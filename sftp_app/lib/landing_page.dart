@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import "error_popup.dart";
-
 
 class LandingPage extends StatefulWidget {
   LandingPage(
@@ -120,58 +118,46 @@ class LandingPageState extends State<LandingPage> {
           ElevatedButton(
               onPressed: () {
                 // verify if host name and port are vaild
-                
-                 if (hostnameInput.getText() != "") {
+
+                if (hostnameInput.getText() != "") {
+                  hostname = hostnameInput.getText();
+                } else if (widget.hostname != "") {
                   hostname = hostnameInput.getText();
                 }
-                else if (widget.hostname != "") {
-                  hostname = hostnameInput.getText();
-
-                } 
                 if (hostnameInput.getText() != "") {
                   username = usernameInput.getText();
-                }
-                else if (widget.username != "") {
+                } else if (widget.username != "") {
                   username = widget.username;
-
-                } 
+                }
                 if (passwordInput.getText() != "") {
                   password = passwordInput.getText();
-                }
-                else if (widget.password != "") {
+                } else if (widget.password != "") {
                   password = widget.password;
-                  }
+                }
 
                 if (portInput.getText() != "") {
                   try {
                     port = int.parse(portInput.getText());
-
                   } catch (e) {
                     popupDialoge(context, "$e", "password error");
                   }
-                }
-                else if (widget.port != 22) {
+                } else if (widget.port != 22) {
                   try {
                     port = int.parse(portInput.getText());
                   } catch (e) {
                     popupDialoge(context, "$e", "password error");
                   }
-                } 
+                }
                 if (!(hostname == "" && username == "")) {
-
                   setState(() {
-
-
                     try {
                       //using hostname as key
                       var box = Hive.box('session');
-                      if(widget.boxIndex != null){
-
-                      box.putAt(widget.boxIndex!, [hostname, port, username, password]);
-                      }
-                      else{
-
-                      box.add([hostname, port, username, password]);
+                      if (widget.boxIndex != null) {
+                        box.putAt(widget.boxIndex!,
+                            [hostname, port, username, password]);
+                      } else {
+                        box.add([hostname, port, username, password]);
                       }
 
                       print("$hostname $username");
@@ -185,8 +171,7 @@ class LandingPageState extends State<LandingPage> {
                     }
                   });
                 }
-              }
-              ,
+              },
               child: Text("save")),
         ],
       ),

@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   @override
-  var db= Hive.box("session");
+  var db = Hive.box("session");
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,24 +38,54 @@ class HomePageState extends State<HomePage> {
                     onPressed: () {
                       ReceivePort sshRecievePort = ReceivePort();
                       ReceivePort sftpRecievePort = ReceivePort();
+                      String hostname =db.getAt(index)[0] ;
+                      int port = db.getAt(index)[1];
+                      String username = db.getAt(index)[2];
+                      String? password = db.getAt(index)[3];
                       try {
                         //TODO undo this comment haha
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                              return SftpPage(
-                                mainThreadRecivePort:sshRecievePort ,
-                                sftpReciveport:sftpRecievePort ,
-                                hostname: db.getAt(index)[0],
-                                port:db.getAt(index)[1] ,
-                            username:db.getAt(index)[2],
-                            password:db.getAt(index)[3],
-                
-                                
-                                );
-                                })
-                      );
-                            
-
+                        //need to authetnicate that can connect then push the server
+                        //do ssh here and check result
+                        
+                        ReceivePort handleReceivePort = ReceivePort();
+                        IsolateChannel isolateChannel =
+                            IsolateChannel.connectReceive(handleReceivePort);
+                        Isolate.spawn(ssh_main, [
+                          handleReceivePort.sendPort,
+                          hostname,
+                          port,
+                          username,
+                          password,
+                          sftpRecievePort.sendPort
+                        ]);
+                        isolateChannel.stream.listen((message) async {
+                          if (!context.mounted) return; 
+                          if (message[0] == "null_password") {
+                            print("null password");
+                            password = await popupDialogeGetText(
+                                    context,
+                                    "please enter the remote host password",
+                                    "SSH")
+                                .then((value) {
+                              // isolateSendPort.send(["password", password]);
+                            });
+                          }
+                          if (message[0] == "error") {
+                            print(message);
+                            popupDialoge(
+                                context, "${message[1]}", "ssh error");
+                          }
+                          if (message[0] == "success") {
+                            // start sftp
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return SftpPage(
+                            mainThreadRecivePort: sshRecievePort,
+                            sftpReciveport: sftpRecievePort,
+                          );
+                        })); 
+                          }
+                        });
 
                       } catch (e) {
                         popupDialoge(context, "$e", "ssh error");

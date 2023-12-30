@@ -10,44 +10,38 @@ import 'package:dartssh2/dartssh2.dart';
 //handles should be called on main thread and handle success/error messages
 //isoltes functions should only be called in a ssh isolate
 void ssh_main(List args) async {
-  try{
+  try {
+    SendPort sendPort = args[0];
+    String hostname = args[1];
+    int port = args[2];
+    String username = args[3];
+    String? password = args[4];
+    SendPort sftpSendPort = args[5];
 
-  SendPort sendPort = args[0];
-  String hostname = args[1];
-  int port = args[2];
-  String username = args[3];
-  String? password = args[4];
-  SendPort sftpSendPort = args[5];
+    IsolateChannel isolateChannel = IsolateChannel.connectSend(sendPort);
+    IsolateChannel sftpChannel = IsolateChannel.connectSend(sftpSendPort);
 
-  IsolateChannel isolateChannel = IsolateChannel.connectSend(sendPort);
-  IsolateChannel sftpChannel = IsolateChannel.connectSend(sftpSendPort);
+    // have a isolate channel for ssh and one for sftp
+    //maybe one for io too
+    // isolateChannel.stream.listen((message) {
+    //   print("recived message on isolate");
 
-  // have a isolate channel for ssh and one for sftp
-  //maybe one for io too
-  // isolateChannel.stream.listen((message) {
-  //   print("recived message on isolate");
+    // });
 
-  // });
-
-  List? result =
-      await ssh_setup([isolateChannel, hostname, port, username, password]);
-  if (result![0] == "success") {
-    //need to sort this to handle sftp operations, need to asign ssh client
-    print("sucessful");
-    var sftp = await result[1].sftp();
-    sftpSetup(result[1], sftpChannel,sftp);
-
-  } else {
-    // handle error stuff.
-    print("error");
-  }
-  }
-  catch(e){
+    List? result =
+        await ssh_setup([isolateChannel, hostname, port, username, password]);
+    if (result![0] == "success") {
+      //need to sort this to handle sftp operations, need to asign ssh client
+      print("sucessful");
+      var sftp = await result[1].sftp();
+      sftpSetup(result[1], sftpChannel, sftp);
+    } else {
+      // handle error stuff.
+      print("error");
+    }
+  } catch (e) {
     print(e);
   }
-
-
-
 }
 
 Future<List> ssh_setup_initlize(
@@ -137,6 +131,9 @@ void ssh_main_handle(
     IsolateChannel isolateChannel,
     ReceivePort sftpReceivePort,
     IsolateChannel sftpReciveport) async {
+  // this is essentially called in homepage
+
+  //could return a success message and the isolate
   //might be useful to return a recive and send port? can use it later on then.
   ReceivePort handleReceivePort = ReceivePort();
   IsolateChannel isolateChannel =
@@ -163,9 +160,14 @@ void ssh_main_handle(
     }
     if (message[0] == "success") {
       // start sftp
+
       sftp_main_handle();
     }
   });
 
   //this must be called within the ssh setup function
+}
+
+void sshErrorDisplay(BuildContext context, List message) {
+  popupDialoge(context, "${message[1]}", "ssh error");
 }
