@@ -40,6 +40,7 @@ void ssh_main(List args) async {
       print("error");
     }
   } catch (e) {
+
     print(e);
   }
 }
@@ -64,7 +65,7 @@ Future<List?> ssh_setup(List args) async {
   //this function interfaces withn main isolate
   IsolateChannel isolateChannel = args[0];
 
-  List errormsg = ["error", ""]; //used when ssh is not correctly initilised
+  List errormsg = ["error", "incorrect ssh paramters, are all details correct?"]; //used when ssh is not correctly initilised
   try {
     String hostname = args[1];
     int port = args[2];
@@ -168,6 +169,4 @@ void ssh_main_handle(
   //this must be called within the ssh setup function
 }
 
-void sshErrorDisplay(BuildContext context, List message) {
-  popupDialoge(context, "${message[1]}", "ssh error");
-}
+
