@@ -12,7 +12,7 @@ import "package:path/path.dart";
 //one for client machine to upload download
 
 Container fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
-    int numOfFolders, List fileList, IsolateChannel channel, String initPath, bool server , Color colour) {
+    int numOfFolders, List fileList, IsolateChannel channel, String initPath, bool server , Color colour, List selectedItems) {
   //maybe return list so you can reassign server path
   //[container,filepath]
   var path = initPath;
@@ -24,15 +24,32 @@ Container fileView(BuildContext context, BoxConstraints constraints, int numOfFi
       // scrollDirection: Axis.vertical,
       itemCount: numOfFiles,
       itemBuilder: (context, index) {
+        bool checked;
+        bool folder;
         numOfFolders = fileList[0].length;
+        if( !(numOfFolders > index) ){
+          if(selectedItems.contains(fileList[1][index-numOfFolders])){
+          checked = true;
+          }
+          else{
+            checked = false;
+          }
+        }
+        else{
+        checked = false;
+
+        }
         int fileIndex;
         String leadchar = "";
         if (numOfFolders > index) {
           leadchar = "#";
           fileIndex = 0;
+          folder = true;
+          
         } else {
           fileIndex = 1;
           index = index - numOfFolders;
+          folder = false;
         }
         if(server){
         return listTileFilesSFTP(
@@ -41,7 +58,7 @@ Container fileView(BuildContext context, BoxConstraints constraints, int numOfFi
           fileIndex,
           index,
           path,
-          channel
+          channel, checked, folder
         );
         }
         else{
@@ -51,7 +68,7 @@ Container fileView(BuildContext context, BoxConstraints constraints, int numOfFi
           fileIndex,
           index,
           path,
-          channel
+          channel,checked,folder
         );
 
         }
@@ -62,8 +79,16 @@ Container fileView(BuildContext context, BoxConstraints constraints, int numOfFi
   return container;
 }
 
-ListTile listTileFilesSFTP(var leadchar,List fileList,int fileIndex,int index, String serverPath, IsolateChannel sftpChannel ){
+ListTile listTileFilesSFTP(var leadchar,List fileList,int fileIndex,int index, String serverPath, IsolateChannel sftpChannel,bool checked,bool folder){
 return ListTile(
+  trailing: !folder?Checkbox(
+    value:checked,
+    onChanged: (bool? value){
+      checked = !checked;
+      sftpChannel.sink.add(["sftp","selected",fileList[fileIndex][index]]);
+    },
+  ):null
+  ,
           title: Text("$leadchar${fileList[fileIndex][index]}"),
           onTap: () {
             var localPath = serverPath;
@@ -88,8 +113,16 @@ return ListTile(
         );
 
 }
-ListTile listTileFilesLocal(var leadchar,List fileList,int fileIndex,int index, String clientPath, IsolateChannel localChannel ){
+ListTile listTileFilesLocal(var leadchar,List fileList,int fileIndex,int index, String clientPath, IsolateChannel localChannel,bool checked,bool folder ){
 return ListTile(
+  trailing: !folder?Checkbox(
+    value:checked,
+    onChanged: (bool? value){
+      checked = !checked;
+      localChannel.sink.add(["file","selected",fileList[fileIndex][index]]);
+    },
+  ):null
+  ,
           title: Text("$leadchar${fileList[fileIndex][index]}"),
           onTap: () {
             var localPath = clientPath;
@@ -106,7 +139,6 @@ return ListTile(
                 }
                 // localPath = join(serverPath, fileList[fileIndex][index]);
               }
-              print("semd spini");
               localChannel.sink.add(["file", "listdir", localPath]);
             }
           },
@@ -142,7 +174,14 @@ void sftpSetup(
           sftpChannel.sink.add(
               ["sftp", "listdir", items,event[2]]); //path["sftp","listdir",items,sftppath]
         }
+        else if(event[1]=="selected"){
+          String filename = event[2];
+          print(filename);
+          sftpChannel.sink.add(["sftp","selected",filename]);
+        }
       }
+      
+    
     } catch (e) {
       sftpChannel.sink.add(["error", "$e"]);
     }

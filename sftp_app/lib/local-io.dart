@@ -12,6 +12,7 @@ import 'package:stream_channel/isolate_channel.dart';
 void local_main(List args)async{
     SendPort sendPort = args[0];
     IsolateChannel isolateChannel = IsolateChannel.connectSend(sendPort);
+
     isolateChannel.stream.listen((event) async {
       print("event"); 
       if(event[0]=="file"){
@@ -33,6 +34,10 @@ void local_main(List args)async{
             }
           }
           isolateChannel.sink.add(["file","listdir",files,localPath]);
+        }
+        else if(event[1]=="selected"){
+          String filename = event[2];
+          isolateChannel.sink.add(["file","selected",filename]);
         }
       }
     });

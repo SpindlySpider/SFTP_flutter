@@ -11,6 +11,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:path/path.dart';
 
@@ -31,13 +32,18 @@ class SftpPage extends StatefulWidget {
 }
 
 class SftpPageState extends State<SftpPage> {
-  ReceivePort localFileRecivePort = ReceivePort();
+  bool selectOverMultiplePages =
+      false; // change this if you want to download/ upload over multiple pages.
 
+  ReceivePort localFileRecivePort = ReceivePort();
   String serverPath = "/";
   String localPath = Directory.current.path;
   late List serverfileList = [];
   late int serverNumOfFiles = 0;
   late int serverNumOfFolders = 0;
+
+  late List selectedSeverItems = [];
+  late List selectedLocalItems = [];
 
   late List localfileList = [];
   late int localNumOfFiles = 0;
@@ -58,6 +64,9 @@ class SftpPageState extends State<SftpPage> {
       if (message[0] == "sftp") {
         if (message[1] == "listdir") {
           //should be the directory
+          if (!selectOverMultiplePages) {
+            selectedSeverItems = [];
+          }
           serverfileList = message[2];
           serverNumOfFiles = 0;
           serverfileList[0].remove(".");
@@ -76,16 +85,31 @@ class SftpPageState extends State<SftpPage> {
           serverPath = message[3];
           setState(() {});
           // print(numOfFiles);
-        }
-      } else if (message[0] == "error") {
-        await popupDialoge(this.context, message[1], "sftp error")
-            .then((value) {
-          setState(() {
-            // serverErrorOccured = true;
-            serverPath = dirname(serverPath);
+        } else if (message[1] == "selected") {
+          if (message[2] is String) {
+            String filename = message[2];
+
+            if (selectedSeverItems.contains(filename)) {
+              setState(() {
+                selectedSeverItems.remove(filename);
+              });
+            } else {
+              setState(() {
+                selectedSeverItems.add(filename);
+              });
+            }
+            print("here $selectedSeverItems");
+          }
+        } else if (message[0] == "error") {
+          await popupDialoge(this.context, message[1], "sftp error")
+              .then((value) {
+            setState(() {
+              // serverErrorOccured = true;
+              serverPath = dirname(serverPath);
+            });
+            sftpChannel.sink.add(["sftp", "listdir", serverPath]);
           });
-          sftpChannel.sink.add(["sftp", "listdir", serverPath]);
-        });
+        }
       }
     });
 
@@ -97,6 +121,9 @@ class SftpPageState extends State<SftpPage> {
       print(message);
       if (message[0] == "file") {
         if (message[1] == "listdir") {
+          if (!selectOverMultiplePages) {
+            selectedLocalItems = [];
+          }
           //should be the directory
           localfileList = message[2];
           localNumOfFiles = 0;
@@ -116,6 +143,21 @@ class SftpPageState extends State<SftpPage> {
           localPath = message[3];
           setState(() {});
           // print(numOfFiles);
+        } else if (message[1] == "selected") {
+          if (message[2] is String) {
+            String filename = message[2];
+
+            if (selectedLocalItems.contains(filename)) {
+              setState(() {
+                selectedLocalItems.remove(filename);
+              });
+            } else {
+              setState(() {
+                selectedLocalItems.add(filename);
+              });
+            }
+            print("here $selectedLocalItems");
+          }
         }
       } else if (message[0] == "error") {}
     });
@@ -130,6 +172,23 @@ class SftpPageState extends State<SftpPage> {
           backgroundColor: Color.fromARGB(255, 93, 33, 132),
           title: Text("sftp app"),
           leading: Text("$serverPath"),
+          actions: [
+            IconButton(onPressed: (){
+              print("download");
+              if(selectedSeverItems.length>0){
+              // sftpChannel.sink.add();
+
+              }
+              else{
+                popupDialoge(context, "there are no items to download - try pressing the tick box next to files", "download error");
+              }
+
+            }, icon: Icon(Icons.download)),
+            IconButton(onPressed: (){
+print("upload");
+            }, icon: Icon(Icons.upload))
+
+          ],
           centerTitle: true,
         ),
         body: LayoutBuilder(
@@ -143,7 +202,8 @@ class SftpPageState extends State<SftpPage> {
                 sftpChannel,
                 serverPath,
                 true,
-                Colors.grey);
+                Colors.grey,
+                selectedSeverItems);
 
             Container localfileViewContainer = fileView(
                 context,
@@ -154,7 +214,8 @@ class SftpPageState extends State<SftpPage> {
                 localIsolate,
                 localPath,
                 false,
-                const Color.fromARGB(255, 65, 61, 61));
+                const Color.fromARGB(255, 65, 61, 61),
+                selectedLocalItems);
 
             return Column(
               children: [
