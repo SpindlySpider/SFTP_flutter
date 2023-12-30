@@ -121,7 +121,24 @@ class SftpPageState extends State<SftpPage> {
                   "failed to download : ${basename(message[3])}", "download");
             }
           });
-        } else if (message[0] == "error") {
+        } 
+        else if(message[1]=="upload"){
+            if (message[2] == "success") {
+              
+              sftpChannel.sink.add(["sftp", "listdir", serverPath]);
+              
+              popupDialoge(this.context,
+                  "sucessfully uploaded : ${basename(message[3])}", "upload");
+            } else {
+              popupDialoge(this.context,
+                  "failed to upload : ${basename(message[3])}", "upload");
+            }
+            setState(() {
+              
+            });
+
+        }
+        else if (message[0] == "error") {
           await popupDialoge(this.context, message[1], "sftp error")
               .then((value) {
             setState(() {
@@ -261,8 +278,8 @@ else if (message[1] == "delete") {
                 onPressed: () async{
                   print("delete");
                   popupDialogeGetText(context, "are you sure you want to delete(Y/N)", "delete").then((value){
-                    value!.toUpperCase();
-                    if(value=="Y"){
+
+                    if(value!.toUpperCase()=="Y"){
 
                   if (selectedLocalItems.length < 0 &&
                       selectedSeverItems.length < 0) {

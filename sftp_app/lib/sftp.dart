@@ -215,7 +215,9 @@ void sftpSetup(
             file.write(Stream.value(localFile.readAsBytesSync())).then((p) {
               print('File saved successfully at ${serverFilePath}');
               file.close();
+              sftpChannel.sink.add(["sftp","upload","success",serverFilePath]);
             }).catchError((error) {
+              sftpChannel.sink.add(["sftp","upload","fail",serverFilePath]);
               print('Error: $error');
             });
             
@@ -234,6 +236,7 @@ void sftpSetup(
 
           } else if (event[2] == "folder") {}
         }
+        
       }
     } catch (e) {
       sftpChannel.sink.add(["error", "$e"]);
