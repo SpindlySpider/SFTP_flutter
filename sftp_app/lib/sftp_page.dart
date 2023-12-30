@@ -16,7 +16,22 @@ import 'package:path/path.dart';
 class SftpPage extends StatefulWidget {
   SftpPage({
     super.key,
+    required this.mainThreadRecivePort,
+    required this.sftpReciveport,
+    required this.hostname,
+    required this.port,
+    required this.username,
+    required this.password,
+    
   });
+  ReceivePort mainThreadRecivePort;
+  ReceivePort sftpReciveport;
+  String hostname;
+  int port;
+  String username;
+  String? password;
+
+
   // SftpPage({super.key,required this.sshSesh});
   // needs to have isolate channel to send messages. make isolate channel
   // pass in path
@@ -27,8 +42,7 @@ class SftpPage extends StatefulWidget {
 class SftpPageState extends State<SftpPage> { 
   String serverPath = "/";
 
-  ReceivePort mainThreadRecivePort = ReceivePort();
-  ReceivePort sftpReciveport = ReceivePort();
+
   late List fileList =[];
   late int numOfFiles=0;
   late int numOfFolders=0;
@@ -37,11 +51,11 @@ class SftpPageState extends State<SftpPage> {
   @override
   void initState() {
 super.initState();
-    isolateChannel =IsolateChannel.connectReceive(mainThreadRecivePort);
-    sftpChannel= IsolateChannel.connectReceive(sftpReciveport);
+    isolateChannel =IsolateChannel.connectReceive(widget.mainThreadRecivePort);
+    sftpChannel= IsolateChannel.connectReceive(widget.sftpReciveport);
   
     ssh_main_handle("34.140.186.12", 22, "up2107487", this.context, "RjHRL4v8",
-        mainThreadRecivePort, isolateChannel, sftpReciveport, sftpChannel);
+        widget.mainThreadRecivePort, isolateChannel, widget.sftpReciveport, sftpChannel);
 
     sftpChannel.sink.add(["sftp", "listdir", "/"]);
 

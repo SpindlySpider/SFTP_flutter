@@ -1,9 +1,13 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sftp_app/sftp_page.dart';
 import 'package:sftp_app/ssh_isolates.dart';
+import 'package:stream_channel/isolate_channel.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -32,14 +36,27 @@ class HomePageState extends State<HomePage> {
               return ListTile(
                   leading: ElevatedButton(
                     onPressed: () {
+                      ReceivePort sshRecievePort = ReceivePort();
+                      ReceivePort sftpRecievePort = ReceivePort();
                       try {
                         //TODO undo this comment haha
-                      // ssh_main_handle(
-                      //       db.getAt(index)[0],
-                      //       db.getAt(index)[1],
-                      //       db.getAt(index)[2],
-                      //       context,
-                      //       db.getAt(index)[3]);
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return SftpPage(
+                                mainThreadRecivePort:sshRecievePort ,
+                                sftpReciveport:sftpRecievePort ,
+                                hostname: db.getAt(index)[0],
+                                port:db.getAt(index)[1] ,
+                            username:db.getAt(index)[2],
+                            password:db.getAt(index)[3],
+                
+                                
+                                );
+                                })
+                      );
+                            
+
+
                       } catch (e) {
                         popupDialoge(context, "$e", "ssh error");
                       }
