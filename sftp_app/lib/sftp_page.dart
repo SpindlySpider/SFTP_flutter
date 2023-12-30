@@ -67,7 +67,7 @@ class SftpPageState extends State<SftpPage> {
             serverPath = message[3];
           setState(() {
           });
-          print(numOfFiles);
+          // print(numOfFiles);
         }
       } else if (message[0] == "error") {
         await popupDialoge(this.context, message[1], "sftp error").then((value){
@@ -96,14 +96,8 @@ class SftpPageState extends State<SftpPage> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            List fileViewList = fileView(context, constraints, numOfFiles,
-                numOfFolders, fileList, sftpChannel, serverPath);
-            Container fileViewContainer = fileViewList[0];
-            print(serverPath);
-            if (serverErrorOccured) {
-              print("error");
-              serverErrorOccured = false;
-            } else {}
+            Container fileViewContainer = fileView(context, constraints, numOfFiles,
+                numOfFolders, fileList, sftpChannel, serverPath);;
 
             return Column(
               children: [

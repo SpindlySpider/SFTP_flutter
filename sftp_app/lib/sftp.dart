@@ -11,7 +11,7 @@ import "package:path/path.dart";
 //one for server with send port
 //one for client machine to upload download
 
-List fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
+Container fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
     int numOfFolders, List fileList, IsolateChannel sftpChannel, String initServerPath ) {
   //maybe return list so you can reassign server path
   //[container,filepath]
@@ -34,11 +34,26 @@ List fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
           fileIndex = 1;
           index = index - numOfFolders;
         }
-        return ListTile(
+        return listTileFilesSFTP(
+          leadchar,
+          fileList,
+          fileIndex,
+          index,
+          serverPath,
+          sftpChannel
+        );
+      },
+      separatorBuilder: (context, index) => const Divider(),
+    ),
+  );
+  return container;
+}
+
+ListTile listTileFilesSFTP(var leadchar,List fileList,int fileIndex,int index, String serverPath, IsolateChannel sftpChannel ){
+return ListTile(
           title: Text("$leadchar${fileList[fileIndex][index]}"),
           onTap: () {
             var localPath = serverPath;
-            print(serverPath);
             if (fileIndex == 0) {
               if (fileList[fileIndex][index] == "..") {
                 localPath = dirname(serverPath);
@@ -53,18 +68,14 @@ List fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
                 // localPath = join(serverPath, fileList[fileIndex][index]);
               }
               serverPath = localPath;
-              print(localPath);
               sftpChannel.sink.add(["sftp", "listdir", serverPath]);
             }
           },
           // title: Text("5"),
         );
-      },
-      separatorBuilder: (context, index) => const Divider(),
-    ),
-  );
-  return [container,serverPath];
+
 }
+
 
 void sftp_main_handle() {}
 
