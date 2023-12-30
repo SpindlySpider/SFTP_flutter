@@ -98,15 +98,16 @@ return ListTile(
                 localPath = dirname(clientPath);
               } 
               else {
-                if(localPath == "./"){
-                localPath = "/${fileList[fileIndex][index]}";
+                if(localPath == rootPrefix(localPath)){
+                  localPath =join(localPath,fileList[fileIndex][index]);
                 }
                 else{
-                localPath = "$localPath/${fileList[fileIndex][index]}";
+                localPath = join(localPath,fileList[fileIndex][index]);
                 }
                 // localPath = join(serverPath, fileList[fileIndex][index]);
               }
-              localChannel.sink.add(["sftp", "listdir", localPath]);
+              print("semd spini");
+              localChannel.sink.add(["file", "listdir", localPath]);
             }
           },
           // title: Text("5"),

@@ -43,16 +43,15 @@ class SftpPageState extends State<SftpPage> {
   late int localNumOfFiles = 0;
   late int localNumOfFolders = 0;
 
-  var isolateChannel;
+  var localIsolate;
   var sftpChannel;
   @override
   void initState() {
     super.initState();
-    isolateChannel = IsolateChannel.connectReceive(widget.mainThreadRecivePort);
+
     sftpChannel = IsolateChannel.connectReceive(widget.sftpReciveport);
 
-    IsolateChannel localIsolate =
-        IsolateChannel.connectReceive(localFileRecivePort);
+    localIsolate = IsolateChannel.connectReceive(localFileRecivePort);
 
     sftpChannel.sink.add(["sftp", "listdir", serverPath]);
     sftpChannel.stream.listen((message) async {
@@ -152,7 +151,7 @@ class SftpPageState extends State<SftpPage> {
                 localNumOfFiles,
                 localNumOfFolders,
                 localfileList,
-                isolateChannel,
+                localIsolate,
                 localPath,
                 false,
                 const Color.fromARGB(255, 65, 61, 61));
