@@ -37,7 +37,7 @@ Future<String?> popupDialogeGetText(
     String title) async {
   String password = "";
   CustomInputField passwordInput = CustomInputField(
-    labelText: "password",
+    labelText: "",
     showPassword: false,
     icon: Icon(Icons.tag),
     controller_: TextEditingController(),

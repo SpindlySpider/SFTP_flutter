@@ -39,6 +39,16 @@ void local_main(List args)async{
           String filename = event[2];
           isolateChannel.sink.add(["file","selected",filename]);
         }
+        else if(event[1]=="delete"){
+          if(event[2]=="file"){
+          String filename = event[3];
+            File file = File(filename);
+            file.delete();
+          isolateChannel.sink.add(["file","delete","success",filename]);
+
+          }
+        }
+
       }
     });
 }

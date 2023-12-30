@@ -200,6 +200,10 @@ void sftpSetup(
             }).catchError((error) {
               print('Error: $error');
             });
+            sftpChannel.sink.add(["sftp","download","success",event[3]]);
+
+
+
           } else if (event[2] == "folder") {}
         } else if (event[1] == "upload") {
           if (event[2] == "file") {
