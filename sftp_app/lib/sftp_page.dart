@@ -34,6 +34,7 @@ class SftpPageState extends State<SftpPage> {
   late List fileList = [];
   late int numOfFiles = 0;
   late int numOfFolders = 0;
+  bool serverErrorOccured = false;
   var isolateChannel;
   var sftpChannel;
   @override
@@ -42,13 +43,12 @@ class SftpPageState extends State<SftpPage> {
     isolateChannel = IsolateChannel.connectReceive(widget.mainThreadRecivePort);
     sftpChannel = IsolateChannel.connectReceive(widget.sftpReciveport);
 
-    sftpChannel.sink.add(["sftp", "listdir", "/"]);
+    sftpChannel.sink.add(["sftp", "listdir", serverPath]);
 
     sftpChannel.stream.listen((message) async {
       if (message[0] == "sftp") {
         if (message[1] == "listdir") {
           //should be the directory
-          print(message[2]);
           fileList = message[2];
           numOfFiles = 0;
           fileList[0].remove(".");
@@ -64,12 +64,20 @@ class SftpPageState extends State<SftpPage> {
           message[2][1].forEach((element) {
             numOfFiles++;
           });
-          setState(() {});
+            serverPath = message[3];
+          setState(() {
+          });
           print(numOfFiles);
         }
       } else if (message[0] == "error") {
-        popupDialoge(this.context, message[1], "sftp error");
-        serverPath = dirname(serverPath);
+        await popupDialoge(this.context, message[1], "sftp error").then((value){
+        setState(() {
+          // serverErrorOccured = true;
+          serverPath = dirname(serverPath);
+        });
+        sftpChannel.sink.add(["sftp", "listdir", serverPath]);
+
+        });
       }
     });
 
@@ -78,6 +86,7 @@ class SftpPageState extends State<SftpPage> {
   }
 
   Widget build(BuildContext context) {
+    //some how put serverpath here ?
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 93, 33, 132),
@@ -87,53 +96,19 @@ class SftpPageState extends State<SftpPage> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
+            List fileViewList = fileView(context, constraints, numOfFiles,
+                numOfFolders, fileList, sftpChannel, serverPath);
+            Container fileViewContainer = fileViewList[0];
+            print(serverPath);
+            if (serverErrorOccured) {
+              print("error");
+              serverErrorOccured = false;
+            } else {}
+
             return Column(
               children: [
                 Expanded(
-                    child: Container(
-                  height: constraints.maxHeight / 2,
-                  color: Colors.amber,
-                  alignment: Alignment.topCenter,
-                  child: ListView.separated(
-                    // scrollDirection: Axis.vertical,
-                    itemCount: numOfFiles,
-                    itemBuilder: (context, index) {
-                      numOfFolders = fileList[0].length;
-                      int fileIndex;
-                      String leadchar = "";
-                      if (numOfFolders > index) {
-                        leadchar = "#";
-                        fileIndex = 0;
-                      } else {
-                        fileIndex = 1;
-                        index = index - numOfFolders;
-                      }
-                      return ListTile(
-                        title: Text("$leadchar${fileList[fileIndex][index]}"),
-                        onTap: () {
-                          var localPath = serverPath;
-                          print(serverPath);
-                          if (fileIndex == 0) {
-                            if (fileList[fileIndex][index] == "..") {
-                              localPath = dirname(serverPath);
-                            } else {
-                              localPath =
-                                  join(serverPath, fileList[fileIndex][index]);
-                              localPath =
-                                  "$serverPath/${fileList[fileIndex][index]}";
-                            }
-                            serverPath = localPath;
-                            print(localPath);
-                            sftpChannel.sink
-                                .add(["sftp", "listdir", localPath]);
-                          }
-                        },
-                        // title: Text("5"),
-                      );
-                    },
-                    separatorBuilder: (context, index) => const Divider(),
-                  ),
-                )
+                  child: fileViewContainer,
                 ),
                 Divider(
                   color: Colors.black,

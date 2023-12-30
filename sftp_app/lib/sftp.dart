@@ -12,10 +12,10 @@ import "package:path/path.dart";
 //one for client machine to upload download
 
 List fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
-    int numOfFolders, List fileList, IsolateChannel sftpChannel) {
+    int numOfFolders, List fileList, IsolateChannel sftpChannel, String initServerPath ) {
   //maybe return list so you can reassign server path
   //[container,filepath]
-  var serverPath;
+  var serverPath = initServerPath;
   Container container = Container(
     height: constraints.maxHeight / 2,
     color: Colors.amber,
@@ -42,13 +42,19 @@ List fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
             if (fileIndex == 0) {
               if (fileList[fileIndex][index] == "..") {
                 localPath = dirname(serverPath);
-              } else {
-                localPath = join(serverPath, fileList[fileIndex][index]);
+              } 
+              else {
+                if(serverPath == "/"){
+                localPath = "/${fileList[fileIndex][index]}";
+                }
+                else{
                 localPath = "$serverPath/${fileList[fileIndex][index]}";
+                }
+                // localPath = join(serverPath, fileList[fileIndex][index]);
               }
               serverPath = localPath;
               print(localPath);
-              sftpChannel.sink.add(["sftp", "listdir", localPath]);
+              sftpChannel.sink.add(["sftp", "listdir", serverPath]);
             }
           },
           // title: Text("5"),
@@ -85,7 +91,7 @@ void sftpSetup(
           }
 
           sftpChannel.sink.add(
-              ["sftp", "listdir", items]); // may cause errors since sftp type
+              ["sftp", "listdir", items,event[2]]); //path["sftp","listdir",items,sftppath]
         }
       }
     } catch (e) {
