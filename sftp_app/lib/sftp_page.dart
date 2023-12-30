@@ -1,4 +1,5 @@
 //this should have two sides, local view and server view
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dartssh2/dartssh2.dart';
@@ -7,6 +8,7 @@ import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -29,12 +31,18 @@ class SftpPage extends StatefulWidget {
 }
 
 class SftpPageState extends State<SftpPage> {
-  String serverPath = "/";
+  ReceivePort localFileRecivePort = ReceivePort();
 
-  late List fileList = [];
-  late int numOfFiles = 0;
-  late int numOfFolders = 0;
-  bool serverErrorOccured = false;
+  String serverPath = "/";
+  String localPath = Directory.current.path;
+  late List serverfileList = [];
+  late int serverNumOfFiles = 0;
+  late int serverNumOfFolders = 0;
+
+  late List localfileList = [];
+  late int localNumOfFiles = 0;
+  late int localNumOfFolders = 0;
+
   var isolateChannel;
   var sftpChannel;
   @override
@@ -43,44 +51,75 @@ class SftpPageState extends State<SftpPage> {
     isolateChannel = IsolateChannel.connectReceive(widget.mainThreadRecivePort);
     sftpChannel = IsolateChannel.connectReceive(widget.sftpReciveport);
 
-    sftpChannel.sink.add(["sftp", "listdir", serverPath]);
+    IsolateChannel localIsolate =
+        IsolateChannel.connectReceive(localFileRecivePort);
 
+    sftpChannel.sink.add(["sftp", "listdir", serverPath]);
     sftpChannel.stream.listen((message) async {
       if (message[0] == "sftp") {
         if (message[1] == "listdir") {
           //should be the directory
-          fileList = message[2];
-          numOfFiles = 0;
-          fileList[0].remove(".");
-          fileList[0].remove("..");
-          fileList[0].insert(0, "..");
+          serverfileList = message[2];
+          serverNumOfFiles = 0;
+          serverfileList[0].remove(".");
+          serverfileList[0].remove("..");
+          serverfileList[0].insert(0, "..");
 
           message[2][0].forEach((element) {
             if (element == "") {}
-            numOfFiles++;
-            numOfFolders++;
+            serverNumOfFiles++;
+            serverNumOfFolders++;
             //use this to see how many folders there are
           });
           message[2][1].forEach((element) {
-            numOfFiles++;
+            serverNumOfFiles++;
           });
-            serverPath = message[3];
-          setState(() {
-          });
+          serverPath = message[3];
+          setState(() {});
           // print(numOfFiles);
         }
       } else if (message[0] == "error") {
-        await popupDialoge(this.context, message[1], "sftp error").then((value){
-        setState(() {
-          // serverErrorOccured = true;
-          serverPath = dirname(serverPath);
-        });
-        sftpChannel.sink.add(["sftp", "listdir", serverPath]);
-
+        await popupDialoge(this.context, message[1], "sftp error")
+            .then((value) {
+          setState(() {
+            // serverErrorOccured = true;
+            serverPath = dirname(serverPath);
+          });
+          sftpChannel.sink.add(["sftp", "listdir", serverPath]);
         });
       }
     });
 
+    Isolate.spawn(local_main, [localFileRecivePort.sendPort]);
+
+    localIsolate.sink.add(["file", "listdir", localPath]);
+
+    localIsolate.stream.listen((message) async {
+      print(message);
+      if (message[0] == "file") {
+        if (message[1] == "listdir") {
+          //should be the directory
+          localfileList = message[2];
+          localNumOfFiles = 0;
+          // localfileList[0].remove(".");
+          // localfileList[0].remove("..");
+          localfileList[0].insert(0, "..");
+
+          message[2][0].forEach((element) {
+            if (element == "") {}
+            localNumOfFiles++;
+            localNumOfFolders++;
+            //use this to see how many folders there are
+          });
+          message[2][1].forEach((element) {
+            localNumOfFiles++;
+          });
+          localPath = message[3];
+          setState(() {});
+          // print(numOfFiles);
+        }
+      } else if (message[0] == "error") {}
+    });
     // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
     //this is handling all of the display of the isolates.
   }
@@ -96,24 +135,38 @@ class SftpPageState extends State<SftpPage> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            Container fileViewContainer = fileView(context, constraints, numOfFiles,
-                numOfFolders, fileList, sftpChannel, serverPath);;
+            Container serverfileViewContainer = fileView(
+                context,
+                constraints,
+                serverNumOfFiles,
+                serverNumOfFiles,
+                serverfileList,
+                sftpChannel,
+                serverPath,
+                true,
+                Colors.grey);
+
+            Container localfileViewContainer = fileView(
+                context,
+                constraints,
+                localNumOfFiles,
+                localNumOfFolders,
+                localfileList,
+                isolateChannel,
+                localPath,
+                false,
+                const Color.fromARGB(255, 65, 61, 61));
 
             return Column(
               children: [
                 Expanded(
-                  child: fileViewContainer,
+                  child: serverfileViewContainer,
                 ),
                 Divider(
                   color: Colors.black,
                   height: 5,
                 ),
-                Expanded(
-                    child: Container(
-                  height: constraints.maxHeight / 2,
-                  color: const Color.fromARGB(255, 77, 74, 67),
-                  alignment: Alignment.bottomCenter,
-                )),
+                Expanded(child: localfileViewContainer)
               ],
             );
           },

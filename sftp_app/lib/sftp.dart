@@ -12,13 +12,13 @@ import "package:path/path.dart";
 //one for client machine to upload download
 
 Container fileView(BuildContext context, BoxConstraints constraints, int numOfFiles,
-    int numOfFolders, List fileList, IsolateChannel sftpChannel, String initServerPath ) {
+    int numOfFolders, List fileList, IsolateChannel channel, String initPath, bool server , Color colour) {
   //maybe return list so you can reassign server path
   //[container,filepath]
-  var serverPath = initServerPath;
+  var path = initPath;
   Container container = Container(
     height: constraints.maxHeight / 2,
-    color: Colors.amber,
+    color: colour,
     alignment: Alignment.topCenter,
     child: ListView.separated(
       // scrollDirection: Axis.vertical,
@@ -34,14 +34,27 @@ Container fileView(BuildContext context, BoxConstraints constraints, int numOfFi
           fileIndex = 1;
           index = index - numOfFolders;
         }
+        if(server){
         return listTileFilesSFTP(
           leadchar,
           fileList,
           fileIndex,
           index,
-          serverPath,
-          sftpChannel
+          path,
+          channel
         );
+        }
+        else{
+        return listTileFilesLocal(
+          leadchar,
+          fileList,
+          fileIndex,
+          index,
+          path,
+          channel
+        );
+
+        }
       },
       separatorBuilder: (context, index) => const Divider(),
     ),
@@ -75,7 +88,31 @@ return ListTile(
         );
 
 }
+ListTile listTileFilesLocal(var leadchar,List fileList,int fileIndex,int index, String clientPath, IsolateChannel localChannel ){
+return ListTile(
+          title: Text("$leadchar${fileList[fileIndex][index]}"),
+          onTap: () {
+            var localPath = clientPath;
+            if (fileIndex == 0) {
+              if (fileList[fileIndex][index] == "..") {
+                localPath = dirname(clientPath);
+              } 
+              else {
+                if(localPath == "./"){
+                localPath = "/${fileList[fileIndex][index]}";
+                }
+                else{
+                localPath = "$localPath/${fileList[fileIndex][index]}";
+                }
+                // localPath = join(serverPath, fileList[fileIndex][index]);
+              }
+              localChannel.sink.add(["sftp", "listdir", localPath]);
+            }
+          },
+          // title: Text("5"),
+        );
 
+}
 
 void sftp_main_handle() {}
 

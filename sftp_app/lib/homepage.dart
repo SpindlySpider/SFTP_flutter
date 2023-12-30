@@ -5,6 +5,7 @@ import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp_page.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -46,10 +47,12 @@ class HomePageState extends State<HomePage> {
                         //TODO undo this comment haha
                         //need to authetnicate that can connect then push the server
                         //do ssh here and check result
-                        
+
                         ReceivePort handleReceivePort = ReceivePort();
-                        IsolateChannel isolateChannel =
+                        IsolateChannel sshisolateChannel =
                             IsolateChannel.connectReceive(handleReceivePort);
+
+
                         Isolate.spawn(ssh_main, [
                           handleReceivePort.sendPort,
                           hostname,
@@ -58,7 +61,10 @@ class HomePageState extends State<HomePage> {
                           password,
                           sftpRecievePort.sendPort
                         ]);
-                        isolateChannel.stream.listen((message) async {
+
+
+                        sshisolateChannel.stream.listen((message) async {
+
                           if (!context.mounted) return; 
                           if (message[0] == "null_password") {
                             print("null password");
