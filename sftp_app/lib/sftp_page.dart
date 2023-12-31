@@ -49,6 +49,7 @@ class SftpPageState extends State<SftpPage> {
   late int localNumOfFiles = 0;
   late int localNumOfFolders = 0;
 
+  var clientIsolate;
   var localIsolate;
   var sftpChannel;
   @override
@@ -58,6 +59,7 @@ class SftpPageState extends State<SftpPage> {
     localIsolate = IsolateChannel.connectReceive(localFileRecivePort);
     sftpChannel.sink.add(["sftp", "listdir", serverPath]);
     sftpChannel.stream.listen((message) async {
+
       if (message[0] == "sftp") {
         if (message[1] == "listdir") {
           //should be the directory
@@ -151,7 +153,9 @@ class SftpPageState extends State<SftpPage> {
       }
     });
 
-    Isolate.spawn(local_main, [localFileRecivePort.sendPort]);
+    Isolate.spawn(local_main, [localFileRecivePort.sendPort]).then((value){
+      clientIsolate = value;
+    });
 
     localIsolate.sink.add(["file", "listdir", localPath]);
 
@@ -223,7 +227,11 @@ else if (message[1] == "delete") {
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 93, 33, 132),
           title: Text("sftp app"),
-          leading: Text("$serverPath"),
+          leading: IconButton(onPressed: (){
+            //must tell isolates to close 
+            clientIsolate.kill();
+            Navigator.pop(context);
+          }, icon: Icon(Icons.arrow_back)),
           actions: [
             IconButton(
                 onPressed: () async {

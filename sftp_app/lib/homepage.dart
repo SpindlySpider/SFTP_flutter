@@ -26,6 +26,23 @@ class HomePageState extends State<HomePage> {
         backgroundColor: Color.fromARGB(255, 93, 33, 132),
         title: Text("sftp app"),
         centerTitle: true,
+        actions: [
+          IconButton(onPressed: () {
+                setState(() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LandingPage(
+                                hostname: "",
+                                password: "",
+                                port: 22,
+                                username: "",
+                              ))).then((value) {
+                    setState(() {});
+                  });
+                });
+              }, icon: Icon(Icons.add_circle_outline_rounded))
+        ],
       ),
       body: Column(
         children: [
@@ -36,7 +53,7 @@ class HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               return ListTile(
                   leading: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       ReceivePort sshRecievePort = ReceivePort();
                       ReceivePort sftpRecievePort = ReceivePort();
                       String hostname =db.getAt(index)[0] ;
@@ -44,16 +61,13 @@ class HomePageState extends State<HomePage> {
                       String username = db.getAt(index)[2];
                       String? password = db.getAt(index)[3];
                       try {
-                        //TODO undo this comment haha
-                        //need to authetnicate that can connect then push the server
-                        //do ssh here and check result
 
                         ReceivePort handleReceivePort = ReceivePort();
                         IsolateChannel sshisolateChannel =
                             IsolateChannel.connectReceive(handleReceivePort);
 
 
-                        Isolate.spawn(ssh_main, [
+                        Isolate sshIsolate = await Isolate.spawn(ssh_main, [
                           handleReceivePort.sendPort,
                           hostname,
                           port,
@@ -83,13 +97,21 @@ class HomePageState extends State<HomePage> {
                           }
                           if (message[0] == "success") {
                             // start sftp
-                        Navigator.push(context,
+                        await Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
                           return SftpPage(
                             mainThreadRecivePort: sshRecievePort,
                             sftpReciveport: sftpRecievePort,
                           );
-                        })); 
+                        }
+                        )
+                        
+                        ).then((value){
+                          sshisolateChannel.sink.add("kill");
+                          sshIsolate.kill();
+                        })
+                        
+                        ; 
                           }
                         });
 
@@ -140,23 +162,8 @@ class HomePageState extends State<HomePage> {
             },
             separatorBuilder: (context, index) => Divider(),
           )),
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => LandingPage(
-                                hostname: "",
-                                password: "",
-                                port: 22,
-                                username: "",
-                              ))).then((value) {
-                    setState(() {});
-                  });
-                });
-              },
-              child: Text("add ssh"))
+
+
         ],
       ),
     );

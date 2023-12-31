@@ -165,6 +165,9 @@ void sftpSetup(
   //need error handling
   sftpChannel.stream.listen((event) async {
     try {
+      if(event == "kill"){
+        
+      }
       if (event[0] == "sftp") {
         if (event[1] == "listdir") {
           //["sftp","listdir","dirpath"]

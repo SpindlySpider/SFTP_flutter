@@ -156,13 +156,16 @@ void ssh_main_handle(
         // isolateSendPort.send(["password", password]);
       });
     }
-    if (message[0] == "error") {
+    else if (message[0] == "error") {
       popupDialoge(buildContext, "${message[1]}", "ssh error");
     }
-    if (message[0] == "success") {
+    else if (message[0] == "success") {
       // start sftp
 
       sftp_main_handle();
+    }
+    else if(message == "kill"){
+      isolateChannel.sink.add("kill");
     }
   });
 
