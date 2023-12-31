@@ -49,9 +49,10 @@ class SftpPageState extends State<SftpPage> {
   late int localNumOfFiles = 0;
   late int localNumOfFolders = 0;
 
-  var clientIsolate;
-  var localIsolate;
-  var sftpChannel;
+  // ignore: prefer_typing_uninitialized_variables
+  late Isolate clientIsolate;
+  late IsolateChannel localIsolate;
+  late IsolateChannel sftpChannel;
   @override
   void initState() {
     super.initState();

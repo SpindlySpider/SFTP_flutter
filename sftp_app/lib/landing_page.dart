@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 import "error_popup.dart";
 
@@ -12,11 +11,11 @@ class LandingPage extends StatefulWidget {
       required this.password,
       required this.port,
       this.boxIndex});
-  String hostname;
-  String username;
-  String password;
-  int port;
-  int? boxIndex;
+  final String hostname;
+  final String username;
+  final String password;
+  final int port;
+  final int? boxIndex;
   @override
   State<LandingPage> createState() => LandingPageState();
 }

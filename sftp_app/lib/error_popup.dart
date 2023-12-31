@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sftp_app/landing_page.dart';
-import 'package:sftp_app/ssh_isolates.dart';
 import 'text_entry_field.dart';
 
 Future<void> popupDialoge(

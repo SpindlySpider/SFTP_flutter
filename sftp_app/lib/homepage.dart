@@ -5,7 +5,6 @@ import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/landing_page.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp_page.dart';
 import 'package:sftp_app/ssh_isolates.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -17,8 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  @override
   var db = Hive.box("session");
+  @override
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,10 +84,7 @@ class HomePageState extends State<HomePage> {
                             password = await popupDialogeGetText(
                                     context,
                                     "please enter the remote host password",
-                                    "SSH")
-                                .then((value) {
-                              // isolateSendPort.send(["password", password]);
-                            });
+                                    "SSH");
                           }
                           if (message[0] == "error") {
                             print(message);
