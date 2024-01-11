@@ -71,13 +71,10 @@ Future<List?> ssh_setup(List args) async {
     int port = args[2];
     String username = args[3];
     String? password = args[4];
-
-    var client;
     if (password == "") {
       isolateChannel.sink.add(["null_password"]);
       isolateChannel.stream.listen((message) async {
         if (message[0] == "password") {
-          client =
               await ssh_setup_initlize(hostname, port, username, message[1])
                   .then((value) async {
             if (value[0] == "success") {
@@ -112,6 +109,7 @@ Future<List?> ssh_setup(List args) async {
         return client;
       }
     }
+    return null;
     // return client;
   } catch (e) {
     isolateChannel.sink.add(["error", "$e"]);

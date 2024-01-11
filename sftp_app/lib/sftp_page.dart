@@ -1,17 +1,11 @@
 //this should have two sides, local view and server view
 import 'dart:io';
 import 'dart:isolate';
-
-import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
 import 'package:sftp_app/error_popup.dart';
-import 'package:sftp_app/landing_page.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp.dart';
-import 'package:sftp_app/ssh_isolates.dart';
-import 'package:sqflite/sqflite.dart';
+
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:path/path.dart';
 
@@ -21,8 +15,8 @@ class SftpPage extends StatefulWidget {
     required this.mainThreadRecivePort,
     required this.sftpReciveport,
   });
-  ReceivePort mainThreadRecivePort;
-  ReceivePort sftpReciveport;
+  final ReceivePort mainThreadRecivePort;
+  final ReceivePort sftpReciveport;
 
   // SftpPage({super.key,required this.sshSesh});
   // needs to have isolate channel to send messages. make isolate channel
@@ -60,7 +54,6 @@ class SftpPageState extends State<SftpPage> {
     localIsolate = IsolateChannel.connectReceive(localFileRecivePort);
     sftpChannel.sink.add(["sftp", "listdir", serverPath]);
     sftpChannel.stream.listen((message) async {
-
       if (message[0] == "sftp") {
         if (message[1] == "listdir") {
           //should be the directory
@@ -114,9 +107,8 @@ class SftpPageState extends State<SftpPage> {
         } else if (message[1] == "download") {
           setState(() {
             if (message[2] == "success") {
-              
               localIsolate.sink.add(["file", "listdir", localPath]);
-              
+
               popupDialoge(this.context,
                   "sucessfully download : ${basename(message[3])}", "download");
             } else {
@@ -124,37 +116,32 @@ class SftpPageState extends State<SftpPage> {
                   "failed to download : ${basename(message[3])}", "download");
             }
           });
-        } 
-        else if(message[1]=="upload"){
-            if (message[2] == "success") {
-              
-              sftpChannel.sink.add(["sftp", "listdir", serverPath]);
-              
-              popupDialoge(this.context,
-                  "sucessfully uploaded : ${basename(message[3])}", "upload");
-            } else {
-              popupDialoge(this.context,
-                  "failed to upload : ${basename(message[3])}", "upload");
-            }
-            setState(() {
-              
-            });
-
-        }
-        else if (message[0] == "error") {
-          await popupDialoge(this.context, message[1], "sftp error")
-              .then((value) {
-            setState(() {
-              // serverErrorOccured = true;
-              serverPath = dirname(serverPath);
-            });
+        } else if (message[1] == "upload") {
+          if (message[2] == "success") {
             sftpChannel.sink.add(["sftp", "listdir", serverPath]);
-          });
+
+            popupDialoge(this.context,
+                "sucessfully uploaded : ${basename(message[3])}", "upload");
+          } else {
+            popupDialoge(this.context,
+                "failed to upload : ${basename(message[3])}", "upload");
+          }
+          setState(() {});
         }
+      }
+      if (message[0] == "error") {
+        await popupDialoge(this.context, message[1], "sftp error")
+            .then((value) {
+          setState(() {
+            // serverErrorOccured = true;
+            serverPath = dirname(serverPath);
+          });
+          sftpChannel.sink.add(["sftp", "listdir", serverPath]);
+        });
       }
     });
 
-    Isolate.spawn(local_main, [localFileRecivePort.sendPort]).then((value){
+    Isolate.spawn(local_main, [localFileRecivePort.sendPort]).then((value) {
       clientIsolate = value;
     });
 
@@ -201,8 +188,7 @@ class SftpPageState extends State<SftpPage> {
             }
             print("here $selectedLocalItems");
           }
-        }
-else if (message[1] == "delete") {
+        } else if (message[1] == "delete") {
           setState(() {
             if (message[2] == "success") {
               localIsolate.sink.add(["file", "listdir", localPath]);
@@ -214,8 +200,7 @@ else if (message[1] == "delete") {
                   "failed to deleted : ${basename(message[3])}", "delete");
             }
           });
-          }
-
+        }
       } else if (message[0] == "error") {}
     });
     // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
@@ -228,11 +213,13 @@ else if (message[1] == "delete") {
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 93, 33, 132),
           title: Text("sftp app"),
-          leading: IconButton(onPressed: (){
-            //must tell isolates to close 
-            clientIsolate.kill();
-            Navigator.pop(context);
-          }, icon: Icon(Icons.arrow_back)),
+          leading: IconButton(
+              onPressed: () {
+                //must tell isolates to close
+                clientIsolate.kill();
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back)),
           actions: [
             IconButton(
                 onPressed: () async {
@@ -284,37 +271,34 @@ else if (message[1] == "delete") {
                 },
                 icon: Icon(Icons.upload)),
             IconButton(
-                onPressed: () async{
+                onPressed: () async {
                   print("delete");
-                  popupDialogeGetText(context, "are you sure you want to delete(Y/N)", "delete").then((value){
-
-                    if(value!.toUpperCase()=="Y"){
-
-                  if (selectedLocalItems.length < 0 &&
-                      selectedSeverItems.length < 0) {
-                    popupDialoge(
-                        context,
-                        "there are no items to delete - try pressing the tick box next to files",
-                        "delete error");
-                  }
-                  if (selectedLocalItems.length > 0) {
-                    for (String item in selectedLocalItems) {
-                      String localFilePath = join(localPath, item);
-                      localIsolate.sink
-                          .add(["file", "delete", "file", localFilePath]);
+                  popupDialogeGetText(context,
+                          "are you sure you want to delete(Y/N)", "delete")
+                      .then((value) {
+                    if (value!.toUpperCase() == "Y") {
+                      if (selectedLocalItems.length < 0 &&
+                          selectedSeverItems.length < 0) {
+                        popupDialoge(
+                            context,
+                            "there are no items to delete - try pressing the tick box next to files",
+                            "delete error");
+                      }
+                      if (selectedLocalItems.length > 0) {
+                        for (String item in selectedLocalItems) {
+                          String localFilePath = join(localPath, item);
+                          localIsolate.sink
+                              .add(["file", "delete", "file", localFilePath]);
+                        }
+                      }
+                      if (selectedSeverItems.length > 0) {
+                        for (String item in selectedSeverItems) {
+                          sftpChannel.sink.add(
+                              ["sftp", "delete", "file", "$serverPath/$item"]);
+                        }
+                      }
                     }
-                  }
-                  if (selectedSeverItems.length > 0) {
-                    for (String item in selectedSeverItems) {
-                      sftpChannel.sink
-                          .add(["sftp", "delete", "file", "$serverPath/$item"]);
-                    }
-                  }
-                    }
-
                   });
-                
-              
                 },
                 icon: Icon(Icons.delete))
           ],

@@ -1,11 +1,6 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:isolate';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:dartssh2/dartssh2.dart';
-import 'package:sftp_app/sftp_server.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import "package:path/path.dart";
 
@@ -165,11 +160,9 @@ void sftpSetup(
   //need error handling
   sftpChannel.stream.listen((event) async {
     try {
-      if(event == "kill"){
-        
-      }
       if (event[0] == "sftp") {
         if (event[1] == "listdir") {
+          print("listdir");
           //["sftp","listdir","dirpath"]
           //can send list of lists where first part is folders, second is files
           var sftpItems = await sftp.listdir(event[2]);
@@ -242,6 +235,7 @@ void sftpSetup(
         
       }
     } catch (e) {
+      print("$e");
       sftpChannel.sink.add(["error", "$e"]);
     }
   });

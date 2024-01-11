@@ -1,14 +1,10 @@
-import 'dart:io';
-
-import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import "landing_page.dart";
 import 'homepage.dart';
-import "sftp_page.dart";
 void main() async{
     await Hive.initFlutter();
+    // ignore: unused_local_variable
     var box = await Hive.openBox('session');
   runApp( const MyApp());
   // runApp( MyApp(sshClient: client));

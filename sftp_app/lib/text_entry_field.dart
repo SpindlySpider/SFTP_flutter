@@ -1,13 +1,13 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class CustomInputField extends StatefulWidget {
   final String labelText;
-  Icon? icon;
+  final Icon? icon;
   bool showPassword;
-  TextEditingController controller_;
-  bool showEye;
+  final TextEditingController controller_;
+  final bool showEye;
 
   CustomInputField({
     required this.labelText,
