@@ -18,10 +18,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   var db = Hive.box("session");
   @override
-  Color textColor = Color.fromARGB(255, 255, 159, 28);
-  Color appBarColor = Color.fromARGB(255, 1, 22, 39);
-  Color backgroundColor = Color.fromARGB(255, 63, 23, 43);
-  Color primary1 = Color.fromARGB(255, 124, 23, 46);
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
+  Color appBarColor = Color.fromARGB(255, 42, 42, 42);
+  Color backgroundColor = Color.fromARGB(255, 22, 22, 22);
+  Color primary1 = Color.fromARGB(255, 74, 74, 74);
   Color primary2 = Color.fromARGB(255, 60, 16, 122);
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +49,10 @@ class HomePageState extends State<HomePage> {
                   });
                 });
               },
-              icon: Icon(Icons.add_circle_outline_rounded,color: textColor,))
+              icon: Icon(
+                Icons.add_circle_outline_rounded,
+                color: textColor,
+              ))
         ],
       ),
       body: Container(
@@ -116,23 +119,28 @@ class HomePageState extends State<HomePage> {
                           popupDialoge(context, "$e", "ssh error");
                         }
                       },
-                      child: Text("connect", style:TextStyle(color: textColor),),
-                      style: ElevatedButton.styleFrom(
-                        primary: primary1
+                      child: Text(
+                        "connect",
+                        style: TextStyle(color: textColor),
                       ),
-                      
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: primary1),
                     ),
                     title: Text(
                         "${db.getAt(index)[0]} :${db.getAt(index)[1]} @${db.getAt(index)[2]} ",
                         style: TextStyle(color: textColor)),
                     trailing: PopupMenuButton<ListTileTitleAlignment>(
-
+                      color: textColor,
+                      iconColor: textColor,
                       itemBuilder: (context) {
                         void removeEntry(index) {
                           db.deleteAt(index);
                         }
+
                         return <PopupMenuEntry<ListTileTitleAlignment>>[
                           PopupMenuItem(
+                            textStyle: TextStyle(
+                                color: textColor, backgroundColor: primary1),
                             child: Text("edit"),
                             onTap: () {
                               Navigator.push(context,
@@ -150,6 +158,8 @@ class HomePageState extends State<HomePage> {
                             },
                           ),
                           PopupMenuItem(
+                            textStyle: TextStyle(
+                                color: textColor, backgroundColor: primary1),
                             child: Text("delete"),
                             onTap: () {
                               setState(() {
@@ -157,13 +167,14 @@ class HomePageState extends State<HomePage> {
                                 removeEntry(index);
                               });
                             },
-                            
                           ),
                         ];
                       },
                     ));
               },
-              separatorBuilder: (context, index) => Divider(color: textColor,),
+              separatorBuilder: (context, index) => Divider(
+                color: textColor,
+              ),
             )),
           ],
         ),

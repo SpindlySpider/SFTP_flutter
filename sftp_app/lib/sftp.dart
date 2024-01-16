@@ -19,9 +19,11 @@ Container fileView(
     bool server,
     Color colour,
     List selectedItems) {
+      
   //maybe return list so you can reassign server path
   //[container,filepath]
   var path = initPath;
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
   Container container = Container(
     height: constraints.maxHeight / 2,
     color: colour,
@@ -61,7 +63,10 @@ Container fileView(
               channel, checked, folder);
         }
       },
-      separatorBuilder: (context, index) => const Divider(),
+      separatorBuilder: (context, index){
+      return Divider(color: textColor);
+      } 
+        
     ),
   );
   return container;
@@ -76,7 +81,14 @@ ListTile listTileFilesSFTP(
     IsolateChannel sftpChannel,
     bool checked,
     bool folder) {
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
   return ListTile(
+    leading: folder
+        ? Icon(
+            Icons.folder,
+            color: textColor,
+          )
+        : null,
     trailing: !folder
         ? Checkbox(
             value: checked,
@@ -87,7 +99,10 @@ ListTile listTileFilesSFTP(
             },
           )
         : null,
-    title: Text("$leadchar${fileList[fileIndex][index]}"),
+    title: Text(
+      "${fileList[fileIndex][index]}",
+      style: TextStyle(color: textColor),
+    ),
     onTap: () {
       var localPath = serverPath;
       if (fileIndex == 0) {
@@ -118,7 +133,16 @@ ListTile listTileFilesLocal(
     IsolateChannel localChannel,
     bool checked,
     bool folder) {
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
+
   return ListTile(
+    leading: folder
+        ? Icon(
+            Icons.folder,
+            color: textColor,
+          )
+        : null,
+
     trailing: !folder
         ? Checkbox(
             value: checked,
@@ -129,7 +153,10 @@ ListTile listTileFilesLocal(
             },
           )
         : null,
-    title: Text("$leadchar${fileList[fileIndex][index]}"),
+    title: Text(
+      "${fileList[fileIndex][index]}",
+      style: TextStyle(color: textColor),
+    ),
     onTap: () {
       var localPath = clientPath;
       if (fileIndex == 0) {
@@ -196,10 +223,7 @@ void sftpSetup(
             }).catchError((error) {
               print('Error: $error');
             });
-            sftpChannel.sink.add(["sftp","download","success",event[3]]);
-
-
-
+            sftpChannel.sink.add(["sftp", "download", "success", event[3]]);
           } else if (event[2] == "folder") {}
         } else if (event[1] == "upload") {
           if (event[2] == "file") {
@@ -211,28 +235,23 @@ void sftpSetup(
             file.write(Stream.value(localFile.readAsBytesSync())).then((p) {
               print('File saved successfully at ${serverFilePath}');
               file.close();
-              sftpChannel.sink.add(["sftp","upload","success",serverFilePath]);
+              sftpChannel.sink
+                  .add(["sftp", "upload", "success", serverFilePath]);
             }).catchError((error) {
-              sftpChannel.sink.add(["sftp","upload","fail",serverFilePath]);
+              sftpChannel.sink.add(["sftp", "upload", "fail", serverFilePath]);
               print('Error: $error');
             });
-            
-
           } else if (event[2] == "folder") {}
-        } else if (event[1]=="delete"){
+        } else if (event[1] == "delete") {
           if (event[2] == "file") {
             String serverFilePath = event[3];
-            sftp.remove(serverFilePath).catchError((onError){
+            sftp.remove(serverFilePath).catchError((onError) {
               print(onError);
-              sftpChannel.sink.add(["sftp","delete","fail"]);
+              sftpChannel.sink.add(["sftp", "delete", "fail"]);
             });
-            sftpChannel.sink.add(["sftp","delete","success",serverFilePath]);
-
-            
-
+            sftpChannel.sink.add(["sftp", "delete", "success", serverFilePath]);
           } else if (event[2] == "folder") {}
         }
-        
       }
     } catch (e) {
       print("$e");

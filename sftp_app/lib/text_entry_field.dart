@@ -8,6 +8,7 @@ class CustomInputField extends StatefulWidget {
   bool showPassword;
   final TextEditingController controller_;
   final bool showEye;
+  
 
   CustomInputField({
     required this.labelText,
@@ -32,24 +33,34 @@ class CustomInputField extends StatefulWidget {
 }
 
 class _CustomInputFieldState extends State<CustomInputField> {
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
+  // Color buttonColor = Color.fromARGB(255, 35, 34, 35);
   @override
   Widget build(BuildContext context) {
     return TextField(
       obscureText: !widget.showPassword,
+      style: TextStyle(color: textColor,),
       decoration: InputDecoration(
           labelText: widget.labelText,
+          // filled: true,
           prefixIcon: widget.icon ?? widget.icon,
           suffixIcon: widget.showEye
               ? IconButton(
                   icon: Icon(
                     Icons.remove_red_eye,
-                    color: widget.showPassword ? Colors.blue : Colors.grey,
+                    color: widget.showPassword ? textColor : Colors.grey,
                   ),
                   onPressed: () {
                     setState(() => widget.showPassword = !widget.showPassword);
                   },
+                color: textColor,
                 )
-              : null),
+              : null,
+              // fillColor: buttonColor,
+              iconColor: textColor,
+              prefixIconColor: textColor,
+              suffixIconColor: textColor,
+              ),
       onChanged: (String intext) {
         setState(() {
           widget.controller_.text = intext;

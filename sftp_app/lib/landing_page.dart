@@ -21,6 +21,12 @@ class LandingPage extends StatefulWidget {
 }
 
 class LandingPageState extends State<LandingPage> {
+  Color textColor = Color.fromARGB(255, 197, 115, 255);
+  Color buttonColor = Color.fromARGB(255, 74, 74, 74);
+  Color appBarColor = Color.fromARGB(255, 42, 42, 42);
+  Color backgroundColor = Color.fromARGB(255, 22, 22, 22);
+  Color primary1 = Color.fromARGB(255, 74, 74, 74);
+  Color primary2 = Color.fromARGB(255, 60, 16, 122);
   CustomInputField hostnameInput = CustomInputField(
     labelText: "hostname",
     showPassword: true,
@@ -75,46 +81,44 @@ class LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 21, 20, 22),
-        title: Text("sftp app"),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: hostnameInput,
-                flex: 2,
-              ),
-              SizedBox(
-                width: 16.0,
-              ),
-              Expanded(
-                child: portInput,
-                flex: 1,
-              ),
-            ],
+          backgroundColor: appBarColor,
+          title: Text(
+            "sftp app",
+            style: TextStyle(color: textColor),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: usernameInput,
-                flex: 1,
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            color: textColor,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          )),
+      body: Container(
+        color: backgroundColor,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: hostnameInput,
+                  flex: 2,
+                ),
+                VerticalDivider(color: textColor, thickness: 2),
+                Expanded(
+                  child: portInput,
+                  flex: 1,
+                ),
+              ],
+            ),
+            Divider(color: textColor),
+            usernameInput,
+            passwordInput,
+            Divider(color: textColor),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:buttonColor 
               ),
-              SizedBox(
-                width: 16.0,
-              ),
-              Expanded(
-                child: passwordInput,
-                flex: 1,
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
-          ElevatedButton(
               onPressed: () {
                 // verify if host name and port are vaild
 
@@ -171,8 +175,10 @@ class LandingPageState extends State<LandingPage> {
                   });
                 }
               },
-              child: Text("save")),
-        ],
+              child: Text("save", style: TextStyle(color: textColor)),
+            )
+          ],
+        ),
       ),
     );
   }

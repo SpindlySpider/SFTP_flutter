@@ -26,6 +26,13 @@ class SftpPage extends StatefulWidget {
 }
 
 class SftpPageState extends State<SftpPage> {
+    Color textColor = Color.fromARGB(255, 197, 115, 255);
+  Color appBarColor = Color.fromARGB(255, 42, 42, 42);
+  Color backgroundColor = Color.fromARGB(255, 22, 22, 22);
+  Color primary1 = Color.fromARGB(255, 74, 74, 74);
+  Color primary2 = Color.fromARGB(255, 60, 16, 122);
+  Color clientColor = Color.fromARGB(255, 22, 22, 22);
+  Color serverColor = Color.fromARGB(255, 22, 22, 22);
   bool selectOverMultiplePages =
       false; // change this if you want to download/ upload over multiple pages.
 
@@ -206,20 +213,23 @@ class SftpPageState extends State<SftpPage> {
     // Isolate.spawn(sftpSetup, [mainThreadRecivePort.sendPort,widget.sshSesh]);
     //this is handling all of the display of the isolates.
   }
+  
 
   Widget build(BuildContext context) {
     //some how put serverpath here ?
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 93, 33, 132),
-          title: Text("sftp app"),
+          backgroundColor: appBarColor,
+          title: Text("sftp app",
+          style: TextStyle(color: textColor)),
           leading: IconButton(
               onPressed: () {
                 //must tell isolates to close
                 clientIsolate.kill();
                 Navigator.pop(context);
               },
-              icon: Icon(Icons.arrow_back)),
+              icon: Icon(Icons.arrow_back, color: textColor,)
+              ,),
           actions: [
             IconButton(
                 onPressed: () async {
@@ -243,7 +253,7 @@ class SftpPageState extends State<SftpPage> {
                         "download error");
                   }
                 },
-                icon: Icon(Icons.download)),
+                icon: Icon(Icons.download,color: textColor,)),
             IconButton(
                 onPressed: () {
                   print("upload");
@@ -269,7 +279,7 @@ class SftpPageState extends State<SftpPage> {
                   }
                   print("upload");
                 },
-                icon: Icon(Icons.upload)),
+                icon: Icon(Icons.upload,color: textColor)),
             IconButton(
                 onPressed: () async {
                   print("delete");
@@ -300,7 +310,7 @@ class SftpPageState extends State<SftpPage> {
                     }
                   });
                 },
-                icon: Icon(Icons.delete))
+                icon: Icon(Icons.delete,color: textColor))
           ],
           centerTitle: true,
         ),
@@ -315,7 +325,7 @@ class SftpPageState extends State<SftpPage> {
                 sftpChannel,
                 serverPath,
                 true,
-                Colors.grey,
+                serverColor,
                 selectedSeverItems);
 
             Container localfileViewContainer = fileView(
@@ -327,7 +337,7 @@ class SftpPageState extends State<SftpPage> {
                 localIsolate,
                 localPath,
                 false,
-                const Color.fromARGB(255, 65, 61, 61),
+                clientColor,
                 selectedLocalItems);
             return Column(
               children: [
@@ -335,8 +345,9 @@ class SftpPageState extends State<SftpPage> {
                   child: serverfileViewContainer,
                 ),
                 Divider(
-                  color: Colors.black,
+                  color: textColor,
                   height: 5,
+                  thickness: 5,
                 ),
                 Expanded(child: localfileViewContainer)
               ],
