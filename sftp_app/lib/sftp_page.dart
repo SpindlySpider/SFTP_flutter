@@ -1,7 +1,9 @@
 //this should have two sides, local view and server view
 import 'dart:io';
 import 'dart:isolate';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sftp_app/error_popup.dart';
 import 'package:sftp_app/local-io.dart';
 import 'package:sftp_app/sftp.dart';
@@ -39,6 +41,11 @@ class SftpPageState extends State<SftpPage> {
   ReceivePort localFileRecivePort = ReceivePort();
   String serverPath = "/";
   String localPath = Directory.current.path;
+
+final directory =  getApplicationDocumentsDirectory().then((value){
+  return value.toString();
+});
+  // String localPath = Directory.current.path;
   late List serverfileList = [];
   late int serverNumOfFiles = 0;
   late int serverNumOfFolders = 0;
@@ -50,13 +57,22 @@ class SftpPageState extends State<SftpPage> {
   late int localNumOfFiles = 0;
   late int localNumOfFolders = 0;
 
+
   // ignore: prefer_typing_uninitialized_variables
   late Isolate clientIsolate;
   late IsolateChannel localIsolate;
   late IsolateChannel sftpChannel;
+  getPaths() async {
+
+
+      Directory document = await getApplicationDocumentsDirectory();
+      localPath = document.toString();
+
+  }
   @override
   void initState() {
     super.initState();
+    getPaths();// i hope it works 
     sftpChannel = IsolateChannel.connectReceive(widget.sftpReciveport);
     localIsolate = IsolateChannel.connectReceive(localFileRecivePort);
     sftpChannel.sink.add(["sftp", "listdir", serverPath]);
@@ -217,6 +233,7 @@ class SftpPageState extends State<SftpPage> {
 
   Widget build(BuildContext context) {
     //some how put serverpath here ?
+    getPaths();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: appBarColor,
@@ -328,6 +345,7 @@ class SftpPageState extends State<SftpPage> {
                 serverColor,
                 selectedSeverItems);
 
+
             Container localfileViewContainer = fileView(
                 context,
                 constraints,
@@ -339,6 +357,7 @@ class SftpPageState extends State<SftpPage> {
                 false,
                 clientColor,
                 selectedLocalItems);
+                
             return Column(
               children: [
                 Expanded(
